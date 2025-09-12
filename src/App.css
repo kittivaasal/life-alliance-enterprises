@@ -1,38 +1,173 @@
-.App {
-  text-align: center;
-}
+/* App.css */
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+.app-container {
+  background: #f4f6f9;
   min-height: 100vh;
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  align-items: flex-start;
+  padding: 2rem;
+  font-family: "Segoe UI", sans-serif;
+  color: #333;
+}
+
+.form-wrapper {
+  width: 100%;
+  max-width: 900px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.form-header {
+  text-align: center;
+  padding: 2rem 1rem 1.5rem;
+  background: linear-gradient(135deg, #2563eb, #1e3a8a);
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.company-logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 0.75rem;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.logo-icon {
+  width: 48px;
+  height: 48px;
+}
+
+.company-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.form-subtitle {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.title-underline {
+  width: 60px;
+  height: 3px;
+  background: white;
+  margin: 1rem auto 0;
+  border-radius: 2px;
+}
+
+.form-card {
+  padding: 2rem;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 2rem 0 1rem;
+  color: #2563eb;
+  border-left: 4px solid #2563eb;
+  padding-left: 0.5rem;
+}
+
+.section-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.input-field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.25rem;
+}
+
+.input-field label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #444;
+}
+
+.input-field input,
+.input-field textarea,
+.input-field select {
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: all 0.2s ease-in-out;
+  background: #fafafa;
+}
+
+.input-field input:focus,
+.input-field textarea:focus,
+.input-field select:focus {
+  border-color: #2563eb;
+  background: white;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+.input-field textarea {
+  resize: vertical;
+}
+
+input[type="radio"],
+input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
+.form-footer {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.submit-button {
+  padding: 0.9rem 2rem;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.submit-button:hover {
+  background: #1d4ed8;
+}
+
+.submit-button.submitting {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.form-disclaimer {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 0.75rem;
+}
+
+.app-footer {
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.85rem;
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  color: #555;
+}
+
+.error{
+  color: red;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
 }
