@@ -1,11 +1,5 @@
+import { FileText, Phone, User, Users } from "lucide-react";
 import { useState } from "react";
-import {
-  User,
-  Phone,
-  FileText,
-  Users,
-  Shield,
-} from "lucide-react";
 import "./App.css";
 
 function App() {
@@ -50,7 +44,7 @@ function App() {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.idNo) newErrors.idNo = "Application ID is required";
+    /*     if (!formData.idNo) newErrors.idNo = "Application ID is required";
     if (!formData.date) newErrors.date = "Application date is required";
     if (!formData.scheme) newErrors.scheme = "Please select a scheme";
     if (!formData.nameOfCustomer) newErrors.nameOfCustomer = "Full name is required";
@@ -77,7 +71,7 @@ function App() {
     if (!formData.cedName) newErrors.cedName = "CED name is required";
     if (!formData.cedMobile) newErrors.cedMobile = "CED mobile is required";
     if (!/^\d{10}$/.test(formData.cedMobile)) newErrors.cedMobile = "Enter a valid 10-digit mobile number";
-    if (!formData.ddName) newErrors.ddName = "DD name is required";
+    if (!formData.ddName) newErrors.ddName = "DD name is required"; */
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -121,7 +115,7 @@ function App() {
         {/* Header */}
         <div className="form-header">
           <div className="company-logo">
-            <Shield className="logo-icon" />
+            <img src="/log.jpg" alt="life logo" width={30} height={30} />
           </div>
           <h1 className="company-title">Life Alliance Enterprises</h1>
           <p className="form-subtitle">Life Savings Scheme Application Form</p>
@@ -197,7 +191,9 @@ function App() {
                 value={formData.nameOfCustomer || ""}
                 onChange={handleChange}
               />
-              {errors.nameOfCustomer && <span className="error">{errors.nameOfCustomer}</span>}
+              {errors.nameOfCustomer && (
+                <span className="error">{errors.nameOfCustomer}</span>
+              )}
             </div>
             <div className="input-field">
               <label>Gender</label>
@@ -256,7 +252,9 @@ function App() {
                   value={formData.nationality || ""}
                   onChange={handleChange}
                 />
-                {errors.nationality && <span className="error">{errors.nationality}</span>}
+                {errors.nationality && (
+                  <span className="error">{errors.nationality}</span>
+                )}
               </div>
             </div>
 
@@ -270,7 +268,9 @@ function App() {
                   value={formData.occupation || ""}
                   onChange={handleChange}
                 />
-                {errors.occupation && <span className="error">{errors.occupation}</span>}
+                {errors.occupation && (
+                  <span className="error">{errors.occupation}</span>
+                )}
               </div>
               <div className="input-field">
                 <label>Qualification</label>
@@ -281,7 +281,9 @@ function App() {
                   value={formData.qualification || ""}
                   onChange={handleChange}
                 />
-                {errors.qualification && <span className="error">{errors.qualification}</span>}
+                {errors.qualification && (
+                  <span className="error">{errors.qualification}</span>
+                )}
               </div>
             </div>
 
@@ -310,7 +312,9 @@ function App() {
                 value={formData.communicationAddress || ""}
                 onChange={handleChange}
               />
-              {errors.communicationAddress && <span className="error">{errors.communicationAddress}</span>}
+              {errors.communicationAddress && (
+                <span className="error">{errors.communicationAddress}</span>
+              )}
             </div>
 
             <div className="grid-2">
@@ -323,7 +327,9 @@ function App() {
                   value={formData.mobileNo || ""}
                   onChange={handleChange}
                 />
-                {errors.mobileNo && <span className="error">{errors.mobileNo}</span>}
+                {errors.mobileNo && (
+                  <span className="error">{errors.mobileNo}</span>
+                )}
               </div>
               <div className="input-field">
                 <label>Landline Number</label>
@@ -347,7 +353,9 @@ function App() {
                   value={formData.pincode || ""}
                   onChange={handleChange}
                 />
-                {errors.pincode && <span className="error">{errors.pincode}</span>}
+                {errors.pincode && (
+                  <span className="error">{errors.pincode}</span>
+                )}
               </div>
               <div className="input-field">
                 <label>Email Address</label>
@@ -375,7 +383,9 @@ function App() {
                   value={formData.fatherOrHusbandName || ""}
                   onChange={handleChange}
                 />
-                {errors.fatherOrHusbandName && <span className="error">{errors.fatherOrHusbandName}</span>}
+                {errors.fatherOrHusbandName && (
+                  <span className="error">{errors.fatherOrHusbandName}</span>
+                )}
               </div>
               <div className="input-field">
                 <label>Mother's Name</label>
@@ -385,7 +395,9 @@ function App() {
                   value={formData.motherName || ""}
                   onChange={handleChange}
                 />
-                {errors.motherName && <span className="error">{errors.motherName}</span>}
+                {errors.motherName && (
+                  <span className="error">{errors.motherName}</span>
+                )}
               </div>
             </div>
 
@@ -398,7 +410,9 @@ function App() {
                   value={formData.nomineeName || ""}
                   onChange={handleChange}
                 />
-                {errors.nomineeName && <span className="error">{errors.nomineeName}</span>}
+                {errors.nomineeName && (
+                  <span className="error">{errors.nomineeName}</span>
+                )}
               </div>
               <div className="input-field">
                 <label>Nominee's Age</label>
@@ -408,7 +422,9 @@ function App() {
                   value={formData.nomineeAge || ""}
                   onChange={handleChange}
                 />
-                {errors.nomineeAge && <span className="error">{errors.nomineeAge}</span>}
+                {errors.nomineeAge && (
+                  <span className="error">{errors.nomineeAge}</span>
+                )}
               </div>
             </div>
 
@@ -425,7 +441,9 @@ function App() {
                   value={formData.introducerName || ""}
                   onChange={handleChange}
                 />
-                {errors.introducerName && <span className="error">{errors.introducerName}</span>}
+                {errors.introducerName && (
+                  <span className="error">{errors.introducerName}</span>
+                )}
               </div>
               <div className="input-field">
                 <label>Introducer Mobile</label>
@@ -435,7 +453,9 @@ function App() {
                   value={formData.introducerMobileNo || ""}
                   onChange={handleChange}
                 />
-                {errors.introducerMobileNo && <span className="error">{errors.introducerMobileNo}</span>}
+                {errors.introducerMobileNo && (
+                  <span className="error">{errors.introducerMobileNo}</span>
+                )}
               </div>
             </div>
 
@@ -448,7 +468,9 @@ function App() {
                   value={formData.cedName || ""}
                   onChange={handleChange}
                 />
-                {errors.cedName && <span className="error">{errors.cedName}</span>}
+                {errors.cedName && (
+                  <span className="error">{errors.cedName}</span>
+                )}
               </div>
               <div className="input-field">
                 <label>CED Mobile</label>
@@ -458,7 +480,9 @@ function App() {
                   value={formData.cedMobile || ""}
                   onChange={handleChange}
                 />
-                {errors.cedMobile && <span className="error">{errors.cedMobile}</span>}
+                {errors.cedMobile && (
+                  <span className="error">{errors.cedMobile}</span>
+                )}
               </div>
             </div>
 
