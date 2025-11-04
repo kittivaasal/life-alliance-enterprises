@@ -59,34 +59,34 @@ function App() {
 
   const validateForm = () => {
     const newErrors = {};
-    /*     if (!formData.idNo) newErrors.idNo = "Application ID is required";
-    if (!formData.date) newErrors.date = "Application date is required";
-    if (!formData.scheme) newErrors.scheme = "Please select a scheme";
+        // if (!formData.idNo) newErrors.idNo = "Application ID is required";
+    // if (!formData.date) newErrors.date = "Application date is required";
+    // if (!formData.scheme) newErrors.scheme = "Please select a scheme";
     if (!formData.nameOfCustomer) newErrors.nameOfCustomer = "Full name is required";
-    if (!formData.gender) newErrors.gender = "Please select your gender";
-    if (!formData.dob) newErrors.dob = "Date of birth is required";
-    if (!formData.nationality) newErrors.nationality = "Nationality is required";
-    if (!formData.occupation) newErrors.occupation = "Occupation is required";
-    if (!formData.qualification) newErrors.qualification = "Qualification is required";
-    if (!formData.panNo) newErrors.panNo = "PAN number is required";
+    // if (!formData.gender) newErrors.gender = "Please select your gender";
+    // if (!formData.dob) newErrors.dob = "Date of birth is required";
+    // if (!formData.nationality) newErrors.nationality = "Nationality is required";
+    // if (!formData.occupation) newErrors.occupation = "Occupation is required";
+    // if (!formData.qualification) newErrors.qualification = "Qualification is required";
+    // if (!formData.panNo) newErrors.panNo = "PAN number is required";
     if (!formData.communicationAddress) newErrors.communicationAddress = "Address is required";
     if (!formData.mobileNo) newErrors.mobileNo = "Mobile number is required";
     if (!/^\d{10}$/.test(formData.mobileNo)) newErrors.mobileNo = "Enter a valid 10-digit mobile number";
-    if (!formData.pincode) newErrors.pincode = "PIN code is required";
-    if (!/^\d{6}$/.test(formData.pincode)) newErrors.pincode = "Enter a valid 6-digit PIN code";
+    // if (!formData.pincode) newErrors.pincode = "PIN code is required";
+    // if (!/^\d{6}$/.test(formData.pincode)) newErrors.pincode = "Enter a valid 6-digit PIN code";
     if (!formData.email) newErrors.email = "Email address is required";
     if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Enter a valid email address";
-    if (!formData.fatherOrHusbandName) newErrors.fatherOrHusbandName = "Father's / Husband's name is required";
-    if (!formData.motherName) newErrors.motherName = "Mother's name is required";
-    if (!formData.nomineeName) newErrors.nomineeName = "Nominee name is required";
-    if (!formData.nomineeAge) newErrors.nomineeAge = "Nominee age is required";
+    // if (!formData.fatherOrHusbandName) newErrors.fatherOrHusbandName = "Father's / Husband's name is required";
+    // if (!formData.motherName) newErrors.motherName = "Mother's name is required";
+    // if (!formData.nomineeName) newErrors.nomineeName = "Nominee name is required";
+    // if (!formData.nomineeAge) newErrors.nomineeAge = "Nominee age is required";
     if (!formData.introducerName) newErrors.introducerName = "Introducer name is required";
-    if (!formData.introducerMobileNo) newErrors.introducerMobileNo = "Introducer mobile is required";
-    if (!/^\d{10}$/.test(formData.introducerMobileNo)) newErrors.introducerMobileNo = "Enter a valid 10-digit mobile number";
-    if (!formData.cedName) newErrors.cedName = "CED name is required";
-    if (!formData.cedMobile) newErrors.cedMobile = "CED mobile is required";
-    if (!/^\d{10}$/.test(formData.cedMobile)) newErrors.cedMobile = "Enter a valid 10-digit mobile number";
-    if (!formData.ddName) newErrors.ddName = "DD name is required"; */
+    // if (!formData.introducerMobileNo) newErrors.introducerMobileNo = "Introducer mobile is required";
+    // if (!/^\d{10}$/.test(formData.introducerMobileNo)) newErrors.introducerMobileNo = "Enter a valid 10-digit mobile number";
+    // if (!formData.cedName) newErrors.cedName = "CED name is required";
+    // if (!formData.cedMobile) newErrors.cedMobile = "CED mobile is required";
+    // if (!/^\d{10}$/.test(formData.cedMobile)) newErrors.cedMobile = "Enter a valid 10-digit mobile number";
+    // if (!formData.ddName) newErrors.ddName = "DD name is required"; 
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
