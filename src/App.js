@@ -1,5 +1,5 @@
 import { FileText, Phone, User, Users } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 
 function App() {
@@ -29,9 +29,24 @@ function App() {
     cedMobile: "",
     ddName: "",
   });
+  // ✅ Add these states at the top of your component
+  const [showSchemePopup, setShowSchemePopup] = useState(false);
+  const [selectedScheme, setSelectedScheme] = useState(""); // ✅ Store selected scheme temporarily
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // ✅ Auto-fill ID and Date when page loads
+  useEffect(() => {
+    const today = new Date().toISOString().split("T")[0]; // ✅ YYYY-MM-DD format
+    const uniqueId = `LIFE-${Date.now()}`; // ✅ Simple unique ID based on timestamp
+
+    setFormData((prev) => ({
+      ...prev,
+      idNo: uniqueId, // ✅ Sets auto-generated ID
+      date: today, // ✅ Sets today's date
+    }));
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type } = e.target;
@@ -77,7 +92,76 @@ function App() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async () => {
+  // ✅ Modify your handleSubmit (instead of sending directly to backend)
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setShowSchemePopup(true); // ✅ Open popup instead of submitting
+  };
+
+  // ✅ Final submission after scheme is selected
+  const handleSchemeSubmit = async () => {
+    if (!selectedScheme) {
+      // should not happen because submit button is disabled when not selected
+      alert("Please select a scheme");
+      return;
+    }
+
+    // construct the final payload here (avoid relying on setFormData to have applied immediately)
+    const payload = {
+      ...formData,
+      scheme: selectedScheme,
+    };
+
+    // Optional: set loading state
+    setIsSubmitting(true);
+
+    try {
+      const baseUrl = process.env.REACT_APP_API_URL
+      const res = await fetch(
+        baseUrl,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload), // send the payload directly
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error(`Server error: ${res.status}`);
+      }
+
+      const data = await res.json();
+      console.log("Form Submitted:", data);
+      alert("Application submitted successfully!");
+
+      // reset form back to initial shape (not empty object)
+      const today = new Date().toISOString().split("T")[0];
+      setFormData({
+        ...Object.keys(formData).reduce(
+          (acc, key) => ({ ...acc, [key]: "" }),
+          {}
+        ),
+        idNo: `LIFE-${Date.now()}`,
+        date: today,
+        scheme: "", // reset scheme too
+      });
+
+      setSelectedScheme("");
+    } catch (err) {
+      console.error("Submission error:", err);
+      alert("Something went wrong while submitting. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+      setShowSchemePopup(false);
+    }
+  };
+
+  // ✅ Reset popup scheme selection when closing
+  const handlePopupClose = () => {
+    setSelectedScheme(""); // ✅ Clear previously chosen Scheme 1 / 2
+    setShowSchemePopup(false);
+  };
+  /*   const handleSubmit = async () => {
     if (!validateForm()) {
       alert("Please fill all required fields correctly.");
       return;
@@ -107,7 +191,7 @@ function App() {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }; */
 
   return (
     <div className="app-container">
@@ -137,6 +221,7 @@ function App() {
                   placeholder="Enter application ID"
                   value={formData.idNo || ""}
                   onChange={handleChange}
+                  disabled
                 />
                 {errors.idNo && <span className="error">{errors.idNo}</span>}
               </div>
@@ -147,11 +232,12 @@ function App() {
                   name="date"
                   value={formData.date || ""}
                   onChange={handleChange}
+                  disabled
                 />
                 {errors.date && <span className="error">{errors.date}</span>}
               </div>
             </div>
-            <div className="input-field">
+            {/*  <div className="input-field">
               <label>Scheme Type</label>
               <div>
                 <label>
@@ -176,7 +262,7 @@ function App() {
                 </label>
               </div>
               {errors.scheme && <span className="error">{errors.scheme}</span>}
-            </div>
+            </div> */}
 
             {/* Personal Info */}
             <h2 className="section-title">
@@ -516,6 +602,65 @@ function App() {
             </p>
           </div>
         </div>
+        {/* ✅ Scheme Selection Popup - replace your existing popup JSX with this */}
+        {showSchemePopup && (
+          <div className="modal-overlay">
+            <div
+              className="modal-box"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="modal-title"
+            >
+              <h2
+                id="modal-title"
+                style={{ marginBottom: 12, fontSize: 18, fontWeight: 600 }}
+              >
+                Select Scheme Type
+              </h2>
+
+              <div style={{ display: "flex", gap: 8, flexDirection: "column" }}>
+                <button
+                  type="button"
+                  className={`modal-scheme-btn ${
+                    selectedScheme === "Scheme 1" ? "selected" : ""
+                  }`}
+                  onClick={() => setSelectedScheme("Scheme 1")}
+                >
+                  Scheme 1
+                </button>
+
+                <button
+                  type="button"
+                  className={`modal-scheme-btn ${
+                    selectedScheme === "Scheme 2" ? "selected" : ""
+                  }`}
+                  onClick={() => setSelectedScheme("Scheme 2")}
+                >
+                  Scheme 2
+                </button>
+              </div>
+
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="modal-action-btn"
+                  onClick={handlePopupClose}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  className="modal-action-btn primary"
+                  onClick={handleSchemeSubmit}
+                  disabled={!selectedScheme || isSubmitting}
+                >
+                  {isSubmitting ? "Submitting..." : "Submit"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Footer */}
         <div className="app-footer">

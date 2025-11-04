@@ -177,3 +177,65 @@ input[type="checkbox"] {
     grid-template-columns: 1fr;
   }
 }
+
+/* ✅ Modal overlay & container - add to App.css (bottom) */
+
+/* backdrop that covers the whole screen */
+.modal-overlay {
+  position: fixed;
+  inset: 0;                 /* shorthand for top:0; right:0; bottom:0; left:0; */
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;           /* above everything */
+}
+
+/* actual popup box */
+.modal-box {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  width: 320px;
+  max-width: calc(100% - 40px);
+  box-shadow: 0 8px 24px rgba(13, 38, 76, 0.12);
+  color: #111827;          /* neutral dark text */
+}
+
+/* simple styles for selected scheme buttons to match your theme */
+.modal-scheme-btn {
+  display: inline-block;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+
+.modal-scheme-btn.selected {
+  background: #1d4ed8; /* blue-700 */
+  color: #fff;
+  border-color: #1d4ed8;
+}
+
+/* action row */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+.modal-action-btn {
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid #d1d5db;
+  background: #fff;
+}
+.modal-action-btn.primary {
+  background: #10b981; /* green-500 */
+  color: white;
+  border-color: #10b981;
+}
+.modal-action-btn[disabled] { opacity: 0.6; cursor: not-allowed; }
