@@ -32,6 +32,8 @@ function App() {
   // ✅ Add these states at the top of your component
   const [showSchemePopup, setShowSchemePopup] = useState(false);
   const [selectedScheme, setSelectedScheme] = useState(""); // ✅ Store selected scheme temporarily
+  const [showReferencePopup, setShowReferencePopup] = useState(false);
+  const [referenceId, setReferenceId] = useState("");
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -98,18 +100,30 @@ function App() {
     setShowSchemePopup(true); // ✅ Open popup instead of submitting
   };
 
-  // ✅ Final submission after scheme is selected
-  const handleSchemeSubmit = async () => {
+  // ✅ After scheme is selected, open reference popup
+  const handleSchemeSubmit = () => {
     if (!selectedScheme) {
-      // should not happen because submit button is disabled when not selected
       alert("Please select a scheme");
       return;
     }
+    
+    // Close scheme popup and open reference popup
+    setShowSchemePopup(false);
+    setShowReferencePopup(true);
+  };
 
-    // construct the final payload here (avoid relying on setFormData to have applied immediately)
+  // ✅ Final submission after reference ID is entered
+  const handleFinalSubmit = async () => {
+    if (!referenceId.trim()) {
+      alert("Please enter a reference ID");
+      return;
+    }
+
+    // construct the final payload here
     const payload = {
       ...formData,
       scheme: selectedScheme,
+      referenceId: referenceId.trim(),
     };
 
     // Optional: set loading state
@@ -147,19 +161,22 @@ function App() {
       });
 
       setSelectedScheme("");
+      setReferenceId("");
     } catch (err) {
       console.error("Submission error:", err);
       alert("Something went wrong while submitting. Please try again.");
     } finally {
       setIsSubmitting(false);
-      setShowSchemePopup(false);
+      setShowReferencePopup(false);
     }
   };
 
   // ✅ Reset popup scheme selection when closing
   const handlePopupClose = () => {
     setSelectedScheme(""); // ✅ Clear previously chosen Scheme 1 / 2
+    setReferenceId(""); // ✅ Clear reference ID
     setShowSchemePopup(false);
+    setShowReferencePopup(false);
   };
   /*   const handleSubmit = async () => {
     if (!validateForm()) {
@@ -653,7 +670,66 @@ function App() {
                   type="button"
                   className="modal-action-btn primary"
                   onClick={handleSchemeSubmit}
-                  disabled={!selectedScheme || isSubmitting}
+                  disabled={!selectedScheme}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ✅ Reference ID Popup */}
+        {showReferencePopup && (
+          <div className="modal-overlay">
+            <div
+              className="modal-box"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="reference-modal-title"
+            >
+              <h2
+                id="reference-modal-title"
+                style={{ marginBottom: 12, fontSize: 18, fontWeight: 600 }}
+              >
+                Enter Reference ID
+              </h2>
+
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: "block", marginBottom: 8, fontSize: 14,}}>
+                  Reference ID
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter reference ID"
+                  value={referenceId}
+                  onChange={(e) => setReferenceId(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "12px 16px",
+                    border: "1px solid #ddd",
+                    borderRadius: "6px",
+                    fontSize: "14px",
+                    boxSizing: "border-box",
+                  }}
+                  autoFocus
+                />
+              </div>
+
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="modal-action-btn"
+                  onClick={handlePopupClose}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  className="modal-action-btn primary"
+                  onClick={handleFinalSubmit}
+                  disabled={!referenceId.trim() || isSubmitting}
                 >
                   {isSubmitting ? "Submitting..." : "Submit"}
                 </button>
