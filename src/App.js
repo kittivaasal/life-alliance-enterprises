@@ -97,7 +97,13 @@ function App() {
   // ✅ Modify your handleSubmit (instead of sending directly to backend)
   const handleSubmit = (e) => {
     e.preventDefault();
-    setShowSchemePopup(true); // ✅ Open popup instead of submitting
+    
+    // Validate form before opening scheme popup
+    if (!validateForm()) {
+      return; // Don't open popup if validation fails
+    }
+    
+    setShowSchemePopup(true); // ✅ Open popup only after validation passes
   };
 
   // ✅ After scheme is selected, open reference popup
@@ -286,7 +292,7 @@ function App() {
               <User className="section-icon" /> Personal Information
             </h2>
             <div className="input-field">
-              <label>Full Name</label>
+              <label>Full Name <span style={{ color: "red" }}>*</span></label>
               <input
                 type="text"
                 name="nameOfCustomer"
@@ -407,7 +413,7 @@ function App() {
               <Phone className="section-icon" /> Contact Information
             </h2>
             <div className="input-field">
-              <label>Communication Address</label>
+              <label>Communication Address <span style={{ color: "red" }}>*</span></label>
               <textarea
                 name="communicationAddress"
                 placeholder="Enter your complete address"
@@ -422,7 +428,7 @@ function App() {
 
             <div className="grid-2">
               <div className="input-field">
-                <label>Mobile Number</label>
+                <label>Mobile Number <span style={{ color: "red" }}>*</span></label>
                 <input
                   type="tel"
                   name="mobileNo"
@@ -461,7 +467,7 @@ function App() {
                 )}
               </div>
               <div className="input-field">
-                <label>Email Address</label>
+                <label>Email Address <span style={{ color: "red" }}>*</span></label>
                 <input
                   type="email"
                   name="email"
@@ -473,71 +479,13 @@ function App() {
               </div>
             </div>
 
-            {/* Family Info */}
-            <h2 className="section-title">
-              <Users className="section-icon" /> Family & Nominee Details
-            </h2>
-            <div className="grid-2">
-              <div className="input-field">
-                <label>Father's / Husband's Name</label>
-                <input
-                  type="text"
-                  name="fatherOrHusbandName"
-                  value={formData.fatherOrHusbandName || ""}
-                  onChange={handleChange}
-                />
-                {errors.fatherOrHusbandName && (
-                  <span className="error">{errors.fatherOrHusbandName}</span>
-                )}
-              </div>
-              <div className="input-field">
-                <label>Mother's Name</label>
-                <input
-                  type="text"
-                  name="motherName"
-                  value={formData.motherName || ""}
-                  onChange={handleChange}
-                />
-                {errors.motherName && (
-                  <span className="error">{errors.motherName}</span>
-                )}
-              </div>
-            </div>
-
-            <div className="grid-2">
-              <div className="input-field">
-                <label>Nominee's Name</label>
-                <input
-                  type="text"
-                  name="nomineeName"
-                  value={formData.nomineeName || ""}
-                  onChange={handleChange}
-                />
-                {errors.nomineeName && (
-                  <span className="error">{errors.nomineeName}</span>
-                )}
-              </div>
-              <div className="input-field">
-                <label>Nominee's Age</label>
-                <input
-                  type="number"
-                  name="nomineeAge"
-                  value={formData.nomineeAge || ""}
-                  onChange={handleChange}
-                />
-                {errors.nomineeAge && (
-                  <span className="error">{errors.nomineeAge}</span>
-                )}
-              </div>
-            </div>
-
             {/* Introducer Info */}
             <h2 className="section-title">
               <Users className="section-icon" /> Introducer & Reference Details
             </h2>
             <div className="grid-2">
               <div className="input-field">
-                <label>Introducer Name</label>
+                <label>Introducer Name <span style={{ color: "red" }}>*</span></label>
                 <input
                   type="text"
                   name="introducerName"
@@ -598,6 +546,64 @@ function App() {
                 onChange={handleChange}
               />
               {errors.ddName && <span className="error">{errors.ddName}</span>}
+            </div>
+
+            {/* Family Info */}
+            <h2 className="section-title">
+              <Users className="section-icon" /> Family & Nominee Details
+            </h2>
+            <div className="grid-2">
+              <div className="input-field">
+                <label>Father's / Husband's Name</label>
+                <input
+                  type="text"
+                  name="fatherOrHusbandName"
+                  value={formData.fatherOrHusbandName || ""}
+                  onChange={handleChange}
+                />
+                {errors.fatherOrHusbandName && (
+                  <span className="error">{errors.fatherOrHusbandName}</span>
+                )}
+              </div>
+              <div className="input-field">
+                <label>Mother's Name</label>
+                <input
+                  type="text"
+                  name="motherName"
+                  value={formData.motherName || ""}
+                  onChange={handleChange}
+                />
+                {errors.motherName && (
+                  <span className="error">{errors.motherName}</span>
+                )}
+              </div>
+            </div>
+
+            <div className="grid-2">
+              <div className="input-field">
+                <label>Nominee's Name</label>
+                <input
+                  type="text"
+                  name="nomineeName"
+                  value={formData.nomineeName || ""}
+                  onChange={handleChange}
+                />
+                {errors.nomineeName && (
+                  <span className="error">{errors.nomineeName}</span>
+                )}
+              </div>
+              <div className="input-field">
+                <label>Nominee's Age</label>
+                <input
+                  type="number"
+                  name="nomineeAge"
+                  value={formData.nomineeAge || ""}
+                  onChange={handleChange}
+                />
+                {errors.nomineeAge && (
+                  <span className="error">{errors.nomineeAge}</span>
+                )}
+              </div>
             </div>
           </div>
 
