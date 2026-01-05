@@ -1,28 +1,41 @@
-import { FileText, Phone, User, Users } from "lucide-react";
+import { Building2, CreditCard, User, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import "./App.css";
 
 function App() {
-  const [formData, setFormData] = useState({
-    idNo: "",
-    schemeNo: "", // ✅ Scheme number field
-    scheme: "",
-    nameOfCustomer: "",
-    gender: "",
-    dob: "",
-    communicationAddress: "",
-    mobileNo: "",
-    email: "",
-    nomineeName: "",
-    nomineeAge: "",
-    nomineeRelation: "", // ✅ Added Nominee Relationship
-    introducedName: "",
-    introducerMobileNo: "",
-    cedName: "",
-    cedMobile: "",
-    ddName: "",
-    ddMobile: "", // ✅ Added DD Mobile
-  });
+  // ✅ Helper to generate initial form data
+  const getInitialFormData = () => {
+    const uniqueId = `LIFE-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    return {
+      idNo: uniqueId,
+      schemeNo: "", // ID for backend
+      schemeName: "", // Name for display
+      projectId: "", // Backend expects this (same as schemeNo?)
+      date: today, // Application date
+      nameOfCustomer: "",
+      gender: "",
+      dob: "",
+      communicationAddress: "",
+      mobileNo: "",
+      email: "",
+      nomineeName: "",
+      nomineeAge: "",
+      nomineeRelation: "",
+      introducerName: "",
+      introducerMobileNo: "",
+      cedName: "",
+      cedMobile: "",
+      ddName: "",
+      ddMobile: "",
+    };
+  };
+
+  // ✅ State for Multiple Forms
+  const [numberOfForms, setNumberOfForms] = useState(1);
+  const [formsData, setFormsData] = useState([getInitialFormData()]);
+  const [copyAllChecked, setCopyAllChecked] = useState(false); // ✅ Checkbox state
+
   // ✅ Popup state for reference ID only
   const [showReferencePopup, setShowReferencePopup] = useState(false);
   const [referenceId, setReferenceId] = useState("");
@@ -34,34 +47,53 @@ function App() {
   const [allProjects, setAllProjects] = useState([]);
   const [filteredProjects, setFilteredProjects] = useState([]);
   const [schemeSearchQuery, setSchemeSearchQuery] = useState("");
-  const [isSchemeDropdownOpen, setIsSchemeDropdownOpen] = useState(false);
+  const [activeSchemeDropdown, setActiveSchemeDropdown] = useState(null); // ✅ Index or null
   const [isLoadingProjects, setIsLoadingProjects] = useState(false);
 
   // ✅ CED dropdown states
   const [cedList, setCedList] = useState([]);
   const [filteredCedList, setFilteredCedList] = useState([]);
   const [cedSearchQuery, setCedSearchQuery] = useState("");
-  const [isCedDropdownOpen, setIsCedDropdownOpen] = useState(false);
+  const [activeCedDropdown, setActiveCedDropdown] = useState(null); // ✅ Index or null
   const [isLoadingCED, setIsLoadingCED] = useState(false);
 
   // ✅ DD dropdown states
   const [ddList, setDdList] = useState([]);
   const [filteredDdList, setFilteredDdList] = useState([]);
   const [ddSearchQuery, setDdSearchQuery] = useState("");
-  const [isDdDropdownOpen, setIsDdDropdownOpen] = useState(false);
+  const [activeDdDropdown, setActiveDdDropdown] = useState(null); // ✅ Index or null
   const [isLoadingDD, setIsLoadingDD] = useState(false);
 
-  // ✅ Auto-fill ID when page loads
-  useEffect(() => {
-    const uniqueId = `LIFE-${Date.now()}`;
+  // ✅ Handle Number of Forms Change
+  const handleNumberOfFormsChange = (e) => {
+    const value = parseInt(e.target.value, 10) || 1;
+    setNumberOfForms(value);
 
-    setFormData((prev) => ({
-      ...prev,
-      idNo: uniqueId,
-    }));
-  }, []);
+    setFormsData((prev) => {
+      const currentLength = prev.length;
+      if (value > currentLength) {
+        // Add new forms
+        const newForms = Array.from({ length: value - currentLength }, () => getInitialFormData());
+        return [...prev, ...newForms];
+      } else {
+        // Remove forms (keep the first 'value' amount)
+        return prev.slice(0, value);
+      }
+    });
+  };
 
-  // ✅ Fetch all projects/schemes on component mount
+  // ✅ Handle Change for a specific form index
+  const handleChange = (index, e) => {
+    const { name, value, type } = e.target;
+    setFormsData((prev) => {
+      const newData = [...prev];
+      newData[index] = { ...newData[index], [name]: type === "number" ? value.replace(/\D/g, "") : value };
+      return newData;
+    });
+    setErrors((prev) => ({ ...prev, [`${name}-${index}`]: "" })); // clear error on change for specific field
+  };
+
+  // ✅ API Calls (Projects, CED, DD)
   useEffect(() => {
     const baseUrl = process.env.REACT_APP_BASE_URL || "http://localhost:5002";
     
@@ -169,111 +201,149 @@ function App() {
     }
   }, [ddSearchQuery, ddList]);
 
-  const handleChange = (e) => {
-    const { name, value, type } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "number" ? value.replace(/\D/g, "") : value,
-    }));
-    setErrors((prev) => ({ ...prev, [name]: "" })); // clear error on change
-  };
-
-  const validateForm = () => {
+  // ✅ Validate All Forms
+  const validateAllForms = () => {
     const newErrors = {};
-    if (!formData.nameOfCustomer) newErrors.nameOfCustomer = "Full name is required";
-    if (!formData.schemeNo) newErrors.schemeNo = "Please select a scheme";
-    if (!formData.nameOfCustomer) newErrors.nameOfCustomer = "Name is required";
-    
-    // Address validation commented out? If required uncomment
-    if (!formData.communicationAddress) newErrors.communicationAddress = "Address is required";
-    if (!formData.mobileNo) newErrors.mobileNo = "Mobile number is required";
-    if (!/^\d{10}$/.test(formData.mobileNo)) newErrors.mobileNo = "Enter a valid 10-digit mobile number";
-    
-    if (!formData.email) newErrors.email = "Email address is required";
-    if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Enter a valid email address";
-    
-    if (!formData.introducerName) newErrors.introducerName = "Introducer name is required";
-    
-    // ✅ New Mandatory Fields
-    if (!formData.introducerMobileNo) newErrors.introducerMobileNo = "Introducer mobile is required";
-    if (!/^\d{10}$/.test(formData.introducerMobileNo)) newErrors.introducerMobileNo = "Enter a valid 10-digit mobile number";
-    
-    if (!formData.cedName) newErrors.cedName = "CED name is required";
-    if (!formData.cedMobile) newErrors.cedMobile = "CED mobile is required";
-    
-    if (!formData.ddName) newErrors.ddName = "DD name is required";
-    if (!formData.ddMobile) newErrors.ddMobile = "DD mobile is required";
+    let isValid = true;
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  // ✅ Handle form submission - go directly to reference popup
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    // Validate form before opening reference popup
-    if (!validateForm()) {
-      return;
-    }
-    
-    // Open reference popup directly (no scheme popup needed)
-    setShowReferencePopup(true);
-  };
-
-  // ✅ Final submission after reference ID is entered
-  const handleFinalSubmit = async () => {
-    if (!referenceId.trim()) {
-      alert("Please enter a reference ID");
-      return;
-    }
-
-    // construct the final payload - oldScheme is already in formData
-    const payload = {
-      ...formData,
-      referenceId: referenceId.trim(),
-    };
-
-    // Optional: set loading state
-    setIsSubmitting(true);
-
-    try {
-      const baseUrl = process.env.REACT_APP_API_URL
-      const res = await fetch(
-        baseUrl,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload), // send the payload directly
-        }
-      );
-
-      if (!res.ok) {
-        throw new Error(`Server error: ${res.status}`);
+    formsData.forEach((formData, index) => {
+      // Name
+      if (!formData.nameOfCustomer) {
+        newErrors[`nameOfCustomer-${index}`] = "Name is required";
+        isValid = false;
+      }
+      
+      // Scheme
+      if (!formData.schemeNo) {
+        newErrors[`schemeNo-${index}`] = "Please select a scheme";
+        isValid = false;
       }
 
-      const data = await res.json();
-      console.log("Form Submitted:", data);
-      alert("Application submitted successfully!");
+      // Address
+      if (!formData.communicationAddress) {
+        newErrors[`communicationAddress-${index}`] = "Address is required";
+        isValid = false;
+      }
 
-      // reset form back to initial shape
-      const today = new Date().toISOString().split("T")[0];
-      setFormData({
-        ...Object.keys(formData).reduce(
-          (acc, key) => ({ ...acc, [key]: "" }),
-          {}
-        ),
-        idNo: `LIFE-${Date.now()}`,
-        date: today,
+      // Mobile
+      if (!formData.mobileNo) {
+        newErrors[`mobileNo-${index}`] = "Mobile number is required";
+        isValid = false;
+      } else if (!/^\d{10}$/.test(formData.mobileNo)) {
+        newErrors[`mobileNo-${index}`] = "Enter a valid 10-digit mobile number";
+        isValid = false;
+      }
+
+      // Email
+      if (!formData.email) {
+        newErrors[`email-${index}`] = "Email address is required";
+        isValid = false;
+      } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+        newErrors[`email-${index}`] = "Enter a valid email address";
+        isValid = false;
+      }
+
+      // Introducer Name
+      if (!formData.introducerName) {
+        newErrors[`introducerName-${index}`] = "Introducer name is required";
+        isValid = false;
+      }
+
+      // Introducer Mobile
+      if (!formData.introducerMobileNo) {
+        newErrors[`introducerMobileNo-${index}`] = "Introducer mobile is required";
+        isValid = false;
+      } else if (!/^\d{10}$/.test(formData.introducerMobileNo)) {
+        newErrors[`introducerMobileNo-${index}`] = "Enter a valid 10-digit mobile number";
+        isValid = false;
+      }
+
+      // CED
+      if (!formData.cedName) {
+        newErrors[`cedName-${index}`] = "CED name is required";
+        isValid = false;
+      }
+      if (!formData.cedMobile) {
+        newErrors[`cedMobile-${index}`] = "CED mobile is required";
+        isValid = false;
+      }
+
+      // DD
+      if (!formData.ddName) {
+        newErrors[`ddName-${index}`] = "DD name is required";
+        isValid = false;
+      }
+      if (!formData.ddMobile) {
+        newErrors[`ddMobile-${index}`] = "DD mobile is required";
+        isValid = false;
+      }
+    });
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (validateAllForms()) {
+      setShowReferencePopup(true);
+    } else {
+      alert("Please fill all required fields correctly for all applications.");
+    }
+  };
+
+  const handleFinalSubmit = async () => {
+    if (!referenceId.trim()) {
+      alert("Please enter a Reference ID.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // ✅ Construct Array Payload for Bulk Submission
+      const formsArray = formsData.map((form) => {
+        const { schemeName, ...formDataToSend } = form; // Remove schemeName (display only)
+        return {
+          ...formDataToSend,
+          projectId: formDataToSend.schemeNo, // Backend expects projectId (same as schemeNo)
+          referenceId: referenceId, // Attach Reference ID to each
+        };
       });
 
+      // ✅ Wrap in data object as backend expects { "data": [...] }
+      const payload = {
+        data: formsArray
+      };
+
+      // Sending array directly based on user request ("send all data as array")
+      const response = await fetch(`${process.env.REACT_APP_API_URL || "https://customer-form-8auo.onrender.com/api/life/saving/create"}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        // body: JSON.stringify({ data: payload }), // Usually structure is { data: [...] } or just [...]
+        // User said "send all data as array". I'll try sending array directly first or standard {data: []}
+        // Given previous context, let's try sending the array directly if backend expects array body.
+        // Or if backend expects { data: [...] }. 
+        // I will assume Array based on "send all data as array".
+        body: JSON.stringify(payload), 
+      });
+
+      if (!response.ok) throw new Error(`Server error: ${response.status}`);
+
+      const result = await response.json();
+      console.log("Form Submitted:", result);
+      alert("All applications submitted successfully!");
+      
+      // Reset form
+      setFormsData([getInitialFormData()]);
+      setNumberOfForms(1);
       setReferenceId("");
-    } catch (err) {
-      console.error("Submission error:", err);
+      setShowReferencePopup(false);
+      window.location.reload(); 
+    } catch (error) {
+      console.error("Submission error:", error);
       alert("Something went wrong while submitting. Please try again.");
     } finally {
       setIsSubmitting(false);
-      setShowReferencePopup(false);
     }
   };
 
@@ -286,740 +356,531 @@ function App() {
   return (
     <div className="app-container">
       <div className="form-wrapper">
-        {/* Header */}
-        <div className="form-header">
-          <div className="company-logo">
-            <img src="/log.jpg" alt="life logo" width={30} height={30} />
+        <header className="form-header">
+          <div className="logo-section">
+            <Building2 className="logo-icon" />
+            <h1>Life Alliance Enterprises</h1>
           </div>
-          <h1 className="company-title">Life Alliance Enterprises</h1>
-          <p className="form-subtitle">Life Savings Scheme Application Form</p>
-          <div className="title-underline"></div>
-        </div>
+          <p className="subtitle">Customer Application Form</p>
+        </header>
 
-        <div className="form-card">
-          <div className="form-body">
-            {/* Application Details */}
-            <h2 className="section-title">
-              <FileText className="section-icon" /> Application Details
-            </h2>
-
-            {/* ✅ Scheme Dropdown - First Field */}
-            <div className="input-field" style={{ position: "relative" }}>
-              <label>Scheme <span style={{ color: "red" }}>*</span></label>
-              <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+        {/* ✅ Number of Applications Input with Copy Checkbox */}
+        <div style={{ marginBottom: "20px", padding: "15px", backgroundColor: "#f8f9fa", borderRadius: "8px", border: "1px solid #e9ecef" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", alignItems: "end" }}>
+            <div className="input-field" style={{ marginBottom: 0 }}>
+              <label style={{ fontSize: "1rem", fontWeight: "600", color: "#374151" }}>Number of Applications</label>
+              <input
+                type="number"
+                min="1"
+                max="50"
+                value={numberOfForms}
+                onChange={handleNumberOfFormsChange}
+                style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }}
+              />
+            </div>
+            
+            {/* Copy to All Checkbox */}
+            {numberOfForms > 1 && (
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", paddingBottom: "10px" }}>
                 <input
-                  type="text"
-                  placeholder={isLoadingProjects ? "Loading schemes..." : "Search and select scheme"}
-                  value={
-                    formData.schemeNo
-                      ? allProjects.find(p => (p.id || p._id) === formData.schemeNo)?.name ||
-                        allProjects.find(p => (p.id || p._id) === formData.schemeNo)?.projectName ||
-                        allProjects.find(p => (p.id || p._id) === formData.schemeNo)?.schemeName ||
-                        formData.schemeNo
-                      : schemeSearchQuery
-                  }
+                  type="checkbox"
+                  id="copyToAll"
+                  checked={copyAllChecked}
                   onChange={(e) => {
-                    setSchemeSearchQuery(e.target.value);
-                    setIsSchemeDropdownOpen(true);
+                    setCopyAllChecked(e.target.checked);
+                    if (e.target.checked) {
+                      // Copy Form #1 data to all other forms
+                      setFormsData((prev) => {
+                        const newData = [...prev];
+                        const firstForm = newData[0];
+                        for (let i = 1; i < newData.length; i++) {
+                          newData[i] = {
+                            ...firstForm,
+                            idNo: newData[i].idNo, // Keep unique ID
+                          };
+                        }
+                        return newData;
+                      });
+                    }
                   }}
-                  onFocus={() => setIsSchemeDropdownOpen(true)}
-                  disabled={isLoadingProjects}
-                  style={{ paddingRight: "40px", width: "100%" }}
+                  disabled={
+                    // Disable if Form #1 doesn't have all required fields
+                    !formsData[0]?.schemeNo ||
+                    !formsData[0]?.nameOfCustomer ||
+                    !formsData[0]?.communicationAddress ||
+                    !formsData[0]?.mobileNo ||
+                    !formsData[0]?.email ||
+                    !formsData[0]?.introducerName ||
+                    !formsData[0]?.introducerMobileNo ||
+                    !formsData[0]?.cedName ||
+                    !formsData[0]?.cedMobile ||
+                    !formsData[0]?.ddName ||
+                    !formsData[0]?.ddMobile
+                  }
+                  style={{ width: "18px", height: "18px", cursor: "pointer", accentColor: "#4f46e5" }}
                 />
-                {formData.schemeNo && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFormData(prev => ({ ...prev, schemeNo: "" }));
-                      setSchemeSearchQuery("");
-                    }}
-                    style={{
-                      position: "absolute",
-                      right: "8px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      background: "#e5e7eb",
-                      border: "none",
-                      borderRadius: "50%",
-                      width: "22px",
-                      height: "22px",
-                      cursor: "pointer",
-                      fontSize: "14px",
-                      color: "#6b7280",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      lineHeight: "1",
-                      padding: "0",
-                      transition: "all 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "#d1d5db";
-                      e.currentTarget.style.color = "#374151";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "#e5e7eb";
-                      e.currentTarget.style.color = "#6b7280";
-                    }}
-                  >
-                    ✖
-                  </button>
-                )}
-              </div>
-              
-              {/* Dropdown List */}
-              {isSchemeDropdownOpen && !isLoadingProjects && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "100%",
-                    left: 0,
-                    right: 0,
-                    maxHeight: "200px",
-                    overflowY: "auto",
-                    backgroundColor: "white",
-                    border: "1px solid #ddd",
-                    borderRadius: "4px",
-                    marginTop: "4px",
-                    zIndex: 1000,
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                <label 
+                  htmlFor="copyToAll" 
+                  style={{ 
+                    fontSize: "0.95rem", 
+                    fontWeight: "500", 
+                    color: (
+                      !formsData[0]?.schemeNo ||
+                      !formsData[0]?.nameOfCustomer ||
+                      !formsData[0]?.communicationAddress ||
+                      !formsData[0]?.mobileNo ||
+                      !formsData[0]?.email ||
+                      !formsData[0]?.introducerName ||
+                      !formsData[0]?.introducerMobileNo ||
+                      !formsData[0]?.cedName ||
+                      !formsData[0]?.cedMobile ||
+                      !formsData[0]?.ddName ||
+                      !formsData[0]?.ddMobile
+                    ) ? "#9ca3af" : "#4f46e5",
+                    cursor: "pointer",
+                    userSelect: "none"
                   }}
                 >
-                  {filteredProjects.length > 0 ? (
-                    filteredProjects.map((project) => (
-                      <div
-                        key={project.id || project._id}
+                  Copy Application #1 to all
+                </label>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="customer-form">
+          {formsData.map((formData, index) => (
+            <div key={formData.idNo} className="application-card" style={{ marginBottom: "30px", borderBottom: "4px solid #4f46e5", paddingBottom: "20px" }}>
+              
+              <h3 className="section-title" style={{ margin: 0, marginBottom: "15px" }}>Application #{index + 1}</h3>
+
+              {/* Application Details */}
+              <h2 className="section-title">
+                <CreditCard className="section-icon" /> Application Details
+              </h2>
+              
+              {/* ✅ Scheme and Application ID side-by-side */}
+              <div className="grid-2">
+                {/* ✅ Scheme Dropdown */}
+                <div className="input-field" style={{ position: "relative" }}>
+                  <label>Scheme <span style={{ color: "red" }}>*</span></label>
+                  <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                    <input
+                      type="text"
+                      placeholder={isLoadingProjects ? "Loading schemes..." : "Select Scheme"}
+                      value={
+                        formData.schemeName || (activeSchemeDropdown === index ? schemeSearchQuery : "")
+                      }
+                      onChange={(e) => {
+                         setSchemeSearchQuery(e.target.value);
+                         setActiveSchemeDropdown(index); 
+                      }}
+                      onFocus={() => {
+                        setActiveSchemeDropdown(index);
+                        setSchemeSearchQuery("");
+                      }}
+                      disabled={isLoadingProjects}
+                      style={{ paddingRight: "40px", width: "100%" }}
+                    />
+                    {formData.schemeNo && (
+                      <button
+                        type="button"
                         onClick={() => {
-                          setFormData(prev => ({ ...prev, schemeNo: project.id || project._id }));
+                          const newData = [...formsData];
+                          newData[index].schemeNo = "";
+                          newData[index].schemeName = "";
+                          setFormsData(newData);
                           setSchemeSearchQuery("");
-                          setIsSchemeDropdownOpen(false);
                         }}
                         style={{
-                          padding: "10px 12px",
-                          cursor: "pointer",
-                          borderBottom: "1px solid #f0f0f0",
-                          backgroundColor: (formData.schemeNo === (project.id || project._id)) ? "#f0f8ff" : "white",
+                          position: "absolute", right: "8px", top: "50%", transform: "translateY(-50%)",
+                          background: "#e5e7eb", border: "none", borderRadius: "50%", width: "22px", height: "22px",
+                          cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center"
                         }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f5f5f5"}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = 
-                            (formData.schemeNo === (project.id || project._id)) ? "#f0f8ff" : "white";
-                        }}
-                      >
-                        {project.name || project.projectName || project.schemeName || "Unnamed Scheme"}
-                      </div>
-                    ))
-                  ) : (
-                    <div style={{ padding: "10px 12px", color: "#999", textAlign: "center" }}>
-                      No schemes found
+                      >✖</button>
+                    )}
+                  </div>
+
+                   {/* Scheme Dropdown List */}
+                   {activeSchemeDropdown === index && !isLoadingProjects && (
+                    <div className="dropdown-list" style={{
+                        position: "absolute", top: "100%", left: 0, right: 0, maxHeight: "200px", overflowY: "auto",
+                        backgroundColor: "white", border: "1px solid #ddd", zIndex: 1000, marginTop: "4px"
+                      }}>
+                      {filteredProjects.length > 0 ? (
+                        filteredProjects.map((project) => (
+                          <div
+                            key={project.id || project._id}
+                            onClick={() => {
+                              const newData = [...formsData];
+                              newData[index].schemeNo = project.id || project._id; // Store ID
+                              newData[index].schemeName = project.name || project.projectName || project.schemeName; // Store name
+                              setFormsData(newData);
+                              setSchemeSearchQuery("");
+                              setActiveSchemeDropdown(null);
+                            }}
+                            className="dropdown-item"
+                            style={{ padding: "10px", cursor: "pointer", borderBottom: "1px solid #eee" }}
+                          >
+                            {project.name || project.projectName || project.schemeName}
+                          </div>
+                        ))
+                      ) : (
+                        <div style={{ padding: "10px", color: "#999" }}>No schemes found</div>
+                      )}
                     </div>
-                  )}
+                   )}
+                   {activeSchemeDropdown === index && <div className="overlay" onClick={() => setActiveSchemeDropdown(null)} style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 999 }} />}
+                   {errors[`schemeNo-${index}`] && <span className="error">{errors[`schemeNo-${index}`]}</span>}
                 </div>
-              )}
-              
-              {/* Click outside to close dropdown */}
-              {isSchemeDropdownOpen && (
-                <div
-                  onClick={() => setIsSchemeDropdownOpen(false)}
-                  style={{
-                    position: "fixed",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    zIndex: 999,
-                  }}
-                />
-              )}
-            </div>
 
-            <div className="grid-2">
-              <div className="input-field">
-                <label>Application ID</label>
-                <input
-                  type="text"
-                  name="idNo"
-                  placeholder="Enter application ID"
-                  value={formData.idNo || ""}
-                  onChange={handleChange}
-                  disabled
-                />
-                {errors.idNo && <span className="error">{errors.idNo}</span>}
-              </div>
-            </div>       
-
-            {/* Personal Info */}
-            <h2 className="section-title">
-              <User className="section-icon" /> Personal Information
-            </h2>
-            <div className="input-field">
-              <label>Full Name <span style={{ color: "red" }}>*</span></label>
-              <input
-                type="text"
-                name="nameOfCustomer"
-                placeholder="Enter your full name"
-                value={formData.nameOfCustomer || ""}
-                onChange={handleChange}
-              />
-              {errors.nameOfCustomer && (
-                <span className="error">{errors.nameOfCustomer}</span>
-              )}
-            </div>
-            <div className="grid-2">
-              <div className="input-field">
-                <label>Gender</label>
-                <div>
-                  <label>
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="Male"
-                      checked={formData.gender === "Male"}
-                      onChange={handleChange}
-                    />
-                    Male
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="Female"
-                      checked={formData.gender === "Female"}
-                      onChange={handleChange}
-                    />
-                    Female
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="Other"
-                      checked={formData.gender === "Other"}
-                      onChange={handleChange}
-                    />
-                    Other
-                  </label>
-                </div>
-                {errors.gender && <span className="error">{errors.gender}</span>}
-              </div>
-
-              <div className="input-field">
-                <label>Date of Birth</label>
-                <input
-                  type="date"
-                  name="dob"
-                  value={formData.dob || ""}
-                  onChange={handleChange}
-                />
-                {errors.dob && <span className="error">{errors.dob}</span>}
-              </div>
-            </div>
-
-            {/* Contact Info */}
-            <h2 className="section-title">
-              <Phone className="section-icon" /> Contact Information
-            </h2>
-            <div className="input-field">
-              <label>Communication Address <span style={{ color: "red" }}>*</span></label>
-              <textarea
-                name="communicationAddress"
-                placeholder="Enter your complete address"
-                rows="3"
-                value={formData.communicationAddress || ""}
-                onChange={handleChange}
-              />
-              {errors.communicationAddress && (
-                <span className="error">{errors.communicationAddress}</span>
-              )}
-            </div>
-
-            <div className="grid-2">
-              <div className="input-field">
-                <label>Mobile Number <span style={{ color: "red" }}>*</span></label>
-                <input
-                  type="tel"
-                  name="mobileNo"
-                  placeholder="10-digit mobile number"
-                  value={formData.mobileNo || ""}
-                  onChange={handleChange}
-                />
-                {errors.mobileNo && (
-                  <span className="error">{errors.mobileNo}</span>
-                )}
-              </div>
-              <div className="input-field">
-                <label>Email Address <span style={{ color: "red" }}>*</span></label>
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="your.email@example.com"
-                  value={formData.email || ""}
-                  onChange={handleChange}
-                />
-                {errors.email && <span className="error">{errors.email}</span>}
-              </div>
-            </div>
-
-            {/* Introducer Info */}
-            <h2 className="section-title">
-              <Users className="section-icon" /> Introducer & Reference Details
-            </h2>
-            <div className="grid-2">
-              <div className="input-field">
-                <label>Introducer Name <span style={{ color: "red" }}>*</span></label>
-                <input
-                  type="text"
-                  name="introducerName"
-                  value={formData.introducerName || ""}
-                  onChange={handleChange}
-                />
-                {errors.introducerName && (
-                  <span className="error">{errors.introducerName}</span>
-                )}
-              </div>
-              <div className="input-field">
-                <label>Introducer Mobile <span style={{ color: "red" }}>*</span></label>
-                <input
-                  type="tel"
-                  name="introducerMobileNo"
-                  value={formData.introducerMobileNo || ""}
-                  onChange={handleChange}
-                />
-                {errors.introducerMobileNo && (
-                  <span className="error">{errors.introducerMobileNo}</span>
-                )}
-              </div>
-            </div>
-
-            <div className="grid-2">
-              {/* ✅ CED Name Dropdown */}
-              <div className="input-field" style={{ position: "relative" }}>
-                <label>CED Name <span style={{ color: "red" }}>*</span></label>
-                <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                {/* Application ID */}
+                <div className="input-field">
+                  <label>Application ID</label>
                   <input
                     type="text"
-                    placeholder={isLoadingCED ? "Loading CED names..." : "Search and select CED"}
-                    value={
-                      formData.cedName
-                        ? cedList.find(c => c._id === formData.cedName)?.name || formData.cedName
-                        : cedSearchQuery
-                    }
-                    onChange={(e) => {
-                      setCedSearchQuery(e.target.value);
-                      setIsCedDropdownOpen(true);
-                    }}
-                    onFocus={() => setIsCedDropdownOpen(true)}
-                    disabled={isLoadingCED}
-                    style={{ paddingRight: "40px", width: "100%" }}
+                    name="idNo"
+                    value={formData.idNo || ""}
+                    disabled
+                    style={{ backgroundColor: "#f9fafb", cursor: "not-allowed" }}
                   />
-                  {formData.cedName && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setFormData(prev => ({ ...prev, cedName: "", cedMobile: "" }));
+                </div>
+              </div>       
+
+              {/* Personal Info */}
+              <h2 className="section-title">
+                <User className="section-icon" /> Personal Information
+              </h2>
+              
+              <div className="input-field">
+                <label>Full Name <span style={{ color: "red" }}>*</span></label>
+                <input
+                  type="text"
+                  name="nameOfCustomer"
+                  placeholder="Enter full name"
+                  value={formData.nameOfCustomer || ""}
+                  onChange={(e) => handleChange(index, e)}
+                />
+                {errors[`nameOfCustomer-${index}`] && <span className="error">{errors[`nameOfCustomer-${index}`]}</span>}
+              </div>
+              
+              <div className="grid-2">
+                <div className="input-field">
+                  <label>Gender</label>
+                  <div>
+                    <label><input type="radio" name="gender" value="Male" checked={formData.gender === "Male"} onChange={(e) => handleChange(index, e)} /> Male</label>
+                    <label><input type="radio" name="gender" value="Female" checked={formData.gender === "Female"} onChange={(e) => handleChange(index, e)} /> Female</label>
+                    <label><input type="radio" name="gender" value="Other" checked={formData.gender === "Other"} onChange={(e) => handleChange(index, e)} /> Other</label>
+                  </div>
+                </div>
+
+                <div className="input-field">
+                  <label>Date of Birth</label>
+                  <input
+                    type="date"
+                    name="dob"
+                    value={formData.dob || ""}
+                    onChange={(e) => handleChange(index, e)}
+                  />
+                </div>
+              </div>
+
+              <div className="input-field">
+                <label>Communication Address</label>
+                <textarea
+                  name="communicationAddress"
+                  placeholder="Enter full address"
+                  value={formData.communicationAddress || ""}
+                  onChange={(e) => handleChange(index, e)}
+                ></textarea>
+                {errors[`communicationAddress-${index}`] && <span className="error">{errors[`communicationAddress-${index}`]}</span>}
+              </div>
+
+              <div className="grid-2">
+                <div className="input-field">
+                  <label>Mobile Number <span style={{ color: "red" }}>*</span></label>
+                  <input
+                    type="tel"
+                    name="mobileNo"
+                    placeholder="10-digit mobile number"
+                    value={formData.mobileNo || ""}
+                    onChange={(e) => handleChange(index, e)}
+                  />
+                  {errors[`mobileNo-${index}`] && <span className="error">{errors[`mobileNo-${index}`]}</span>}
+                </div>
+                <div className="input-field">
+                  <label>Email Address <span style={{ color: "red" }}>*</span></label>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="your.email@example.com"
+                    value={formData.email || ""}
+                    onChange={(e) => handleChange(index, e)}
+                  />
+                  {errors[`email-${index}`] && <span className="error">{errors[`email-${index}`]}</span>}
+                </div>
+              </div>
+
+              {/* Introducer Info */}
+              <h2 className="section-title">
+                <Users className="section-icon" /> Introducer & Reference Details
+              </h2>
+              <div className="grid-2">
+                <div className="input-field">
+                  <label>Introducer Name <span style={{ color: "red" }}>*</span></label>
+                  <input
+                    type="text"
+                    name="introducerName"
+                    value={formData.introducerName || ""}
+                    onChange={(e) => handleChange(index, e)}
+                  />
+                  {errors[`introducerName-${index}`] && <span className="error">{errors[`introducerName-${index}`]}</span>}
+                </div>
+                <div className="input-field">
+                  <label>Introducer Mobile <span style={{ color: "red" }}>*</span></label>
+                  <input
+                    type="tel"
+                    name="introducerMobileNo"
+                    value={formData.introducerMobileNo || ""}
+                    onChange={(e) => handleChange(index, e)}
+                  />
+                  {errors[`introducerMobileNo-${index}`] && <span className="error">{errors[`introducerMobileNo-${index}`]}</span>}
+                </div>
+              </div>
+
+              <div className="grid-2">
+                {/* ✅ CED Name Dropdown */}
+                <div className="input-field" style={{ position: "relative" }}>
+                  <label>CED Name <span style={{ color: "red" }}>*</span></label>
+                  <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                    <input
+                      type="text"
+                      placeholder={isLoadingCED ? "Loading..." : "Search CED"}
+                      value={
+                        formData.cedName
+                          ? (cedList.find(c => c._id === formData.cedName)?.name || formData.cedName)
+                          : (activeCedDropdown === index ? cedSearchQuery : "")
+                      }
+                      onChange={(e) => {
+                        setCedSearchQuery(e.target.value);
+                        setActiveCedDropdown(index);
+                      }}
+                      onFocus={() => {
+                        setActiveCedDropdown(index);
                         setCedSearchQuery("");
                       }}
-                      style={{
-                        position: "absolute",
-                        right: "8px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        background: "#e5e7eb",
-                        border: "none",
-                        borderRadius: "50%",
-                        width: "22px",
-                        height: "22px",
-                        cursor: "pointer",
-                        fontSize: "14px",
-                        color: "#6b7280",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        lineHeight: "1",
-                        padding: "0",
-                        transition: "all 0.2s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = "#d1d5db";
-                        e.currentTarget.style.color = "#374151";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "#e5e7eb";
-                        e.currentTarget.style.color = "#6b7280";
-                      }}
-                    >
-                      ✖
-                    </button>
-                  )}
-                </div>
-                
-                {/* Dropdown List */}
-                {isCedDropdownOpen && !isLoadingCED && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "100%",
-                      left: 0,
-                      right: 0,
-                      maxHeight: "200px",
-                      overflowY: "auto",
-                      backgroundColor: "white",
-                      border: "1px solid #ddd",
-                      borderRadius: "4px",
-                      marginTop: "4px",
-                      zIndex: 1000,
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                    }}
-                  >
-                    {filteredCedList.length > 0 ? (
-                      filteredCedList.map((ced) => (
-                        <div
-                          key={ced._id}
-                          onClick={() => {
-                            setFormData(prev => ({ 
-                              ...prev, 
-                              cedName: ced._id,
-                              cedMobile: ced.phone || ""
-                            }));
-                            setCedSearchQuery("");
-                            setIsCedDropdownOpen(false);
-                          }}
-                          style={{
-                            padding: "10px 12px",
-                            cursor: "pointer",
-                            borderBottom: "1px solid #f0f0f0",
-                            backgroundColor: (formData.cedName === ced._id) ? "#f0f8ff" : "white",
-                          }}
-                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f5f5f5"}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = 
-                              (formData.cedName === ced._id) ? "#f0f8ff" : "white";
-                          }}
-                        >
-                          <div style={{ fontWeight: "500" }}>{ced.name}</div>
-                          <div style={{ fontSize: "0.85rem", color: "#666" }}>{ced.phone}</div>
-                        </div>
-                      ))
-                    ) : (
-                      <div style={{ padding: "10px 12px", color: "#999", textAlign: "center" }}>
-                        No CED found
-                      </div>
+                      disabled={isLoadingCED}
+                      style={{ paddingRight: "40px", width: "100%" }}
+                    />
+                    {formData.cedName && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                           const newData = [...formsData];
+                           newData[index].cedName = "";
+                           newData[index].cedMobile = "";
+                           setFormsData(newData);
+                           setCedSearchQuery("");
+                        }}
+                        style={{ position: "absolute", right: "8px", top: "50%", transform: "translateY(-50%)", background: "#e5e7eb", border: "none", borderRadius: "50%", width: "22px", height: "22px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                      >✖</button>
                     )}
                   </div>
-                )}
+                  
+                  {/* Dropdown List */}
+                  {activeCedDropdown === index && !isLoadingCED && (
+                    <div className="dropdown-list" style={{ position: "absolute", top: "100%", left: 0, right: 0, maxHeight: "200px", overflowY: "auto", backgroundColor: "white", border: "1px solid #ddd", zIndex: 1000 }}>
+                      {filteredCedList.length > 0 ? (
+                        filteredCedList.map((ced) => (
+                          <div
+                            key={ced._id}
+                            onClick={() => {
+                               const newData = [...formsData];
+                               newData[index].cedName = ced._id;
+                               newData[index].cedMobile = ced.phone || "";
+                               setFormsData(newData);
+                               setCedSearchQuery("");
+                               setActiveCedDropdown(null);
+                            }}
+                            className="dropdown-item" style={{ padding: "10px", cursor: "pointer", borderBottom: "1px solid #eee" }}
+                          >
+                            <div style={{ fontWeight: "500" }}>{ced.name}</div>
+                            <div style={{ fontSize: "0.85rem", color: "#666" }}>{ced.phone}</div>
+                          </div>
+                        ))
+                      ) : (<div style={{ padding: "10px", color: "#999" }}>No CED found</div>)}
+                    </div>
+                  )}
+                  {activeCedDropdown === index && <div className="overlay" onClick={() => setActiveCedDropdown(null)} style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 999 }} />}
+                  {errors[`cedName-${index}`] && <span className="error">{errors[`cedName-${index}`]}</span>}
+                </div>
                 
-                {/* Click outside to close dropdown */}
-                {isCedDropdownOpen && (
-                  <div
-                    onClick={() => setIsCedDropdownOpen(false)}
-                    style={{
-                      position: "fixed",
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      zIndex: 999,
-                    }}
+                {/* ✅ CED Mobile */}
+                <div className="input-field">
+                  <label>CED Mobile <span style={{ color: "red" }}>*</span></label>
+                  <input
+                    type="tel"
+                    name="cedMobile"
+                    value={formData.cedMobile || ""}
+                    disabled
+                    style={{ backgroundColor: "#f3f4f6", cursor: "not-allowed" }}
+                    placeholder="Auto-filled"
                   />
-                )}
-                {errors.cedName && (
-                  <span className="error">{errors.cedName}</span>
-                )}
+                  {errors[`cedMobile-${index}`] && <span className="error">{errors[`cedMobile-${index}`]}</span>}
+                </div>
               </div>
-              
-              {/* ✅ CED Mobile - Auto-filled and disabled */}
-              <div className="input-field">
-                <label>CED Mobile <span style={{ color: "red" }}>*</span></label>
-                <input
-                  type="tel"
-                  name="cedMobile"
-                  value={formData.cedMobile || ""}
-                  disabled
-                  style={{ backgroundColor: "#f3f4f6", cursor: "not-allowed" }}
-                  placeholder="Auto-filled from CED selection"
-                />
-                {errors.cedMobile && (
-                  <span className="error">{errors.cedMobile}</span>
-                )}
-              </div>
-            </div>
 
-            <div className="grid-2">
-              {/* ✅ DD Name Dropdown */}
-              <div className="input-field" style={{ position: "relative" }}>
-                <label>DD Name <span style={{ color: "red" }}>*</span></label>
-                <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+              <div className="grid-2">
+                {/* ✅ DD Name Dropdown */}
+                <div className="input-field" style={{ position: "relative" }}>
+                  <label>DD Name <span style={{ color: "red" }}>*</span></label>
+                  <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                    <input
+                      type="text"
+                      placeholder={isLoadingDD ? "Loading..." : "Search DD"}
+                      value={
+                        formData.ddName
+                          ? (ddList.find(d => d._id === formData.ddName)?.name || formData.ddName)
+                          : (activeDdDropdown === index ? ddSearchQuery : "")
+                      }
+                      onChange={(e) => {
+                        setDdSearchQuery(e.target.value);
+                        setActiveDdDropdown(index);
+                      }}
+                      onFocus={() => {
+                         setActiveDdDropdown(index);
+                         setDdSearchQuery("");
+                      }}
+                      disabled={isLoadingDD}
+                      style={{ paddingRight: "40px", width: "100%" }}
+                    />
+                    {formData.ddName && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                           const newData = [...formsData];
+                           newData[index].ddName = "";
+                           newData[index].ddMobile = "";
+                           setFormsData(newData);
+                           setDdSearchQuery("");
+                        }}
+                        style={{ position: "absolute", right: "8px", top: "50%", transform: "translateY(-50%)", background: "#e5e7eb", border: "none", borderRadius: "50%", width: "22px", height: "22px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                      >✖</button>
+                    )}
+                  </div>
+                  
+                  {/* Dropdown List */}
+                  {activeDdDropdown === index && !isLoadingDD && (
+                    <div className="dropdown-list" style={{ position: "absolute", top: "100%", left: 0, right: 0, maxHeight: "200px", overflowY: "auto", backgroundColor: "white", border: "1px solid #ddd", zIndex: 1000 }}>
+                      {filteredDdList.length > 0 ? (
+                        filteredDdList.map((dd) => (
+                          <div
+                            key={dd._id}
+                            onClick={() => {
+                               const newData = [...formsData];
+                               newData[index].ddName = dd._id;
+                               newData[index].ddMobile = dd.phone || "";
+                               setFormsData(newData);
+                               setDdSearchQuery("");
+                               setActiveDdDropdown(null);
+                            }}
+                            className="dropdown-item" style={{ padding: "10px", cursor: "pointer", borderBottom: "1px solid #eee" }}
+                          >
+                            <div style={{ fontWeight: "500" }}>{dd.name}</div>
+                            <div style={{ fontSize: "0.85rem", color: "#666" }}>{dd.phone}</div>
+                          </div>
+                        ))
+                      ) : (<div style={{ padding: "10px", color: "#999" }}>No DD found</div>)}
+                    </div>
+                  )}
+                  {activeDdDropdown === index && <div className="overlay" onClick={() => setActiveDdDropdown(null)} style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 999 }} />}
+                  {errors[`ddName-${index}`] && <span className="error">{errors[`ddName-${index}`]}</span>}
+                </div>
+
+                {/* ✅ DD Mobile */}
+                <div className="input-field">
+                  <label>DD Mobile <span style={{ color: "red" }}>*</span></label>
+                  <input
+                    type="tel"
+                    name="ddMobile"
+                    value={formData.ddMobile || ""}
+                    disabled
+                    style={{ backgroundColor: "#f3f4f6", cursor: "not-allowed" }}
+                    placeholder="Auto-filled"
+                  />
+                  {errors[`ddMobile-${index}`] && <span className="error">{errors[`ddMobile-${index}`]}</span>}
+                </div>
+              </div>
+
+              {/* Family & Nominee Info */}
+              <h2 className="section-title">
+                <Users className="section-icon" /> Nominee Details
+              </h2>
+              <div className="grid-2">
+                <div className="input-field">
+                  <label>Nominee Name</label>
                   <input
                     type="text"
-                    placeholder={isLoadingDD ? "Loading DD names..." : "Search and select DD"}
-                    value={
-                      formData.ddName
-                        ? ddList.find(d => d._id === formData.ddName)?.name || formData.ddName
-                        : ddSearchQuery
-                    }
-                    onChange={(e) => {
-                      setDdSearchQuery(e.target.value);
-                      setIsDdDropdownOpen(true);
-                    }}
-                    onFocus={() => setIsDdDropdownOpen(true)}
-                    disabled={isLoadingDD}
-                    style={{ paddingRight: "40px", width: "100%" }}
+                    name="nomineeName"
+                    value={formData.nomineeName || ""}
+                    onChange={(e) => handleChange(index, e)}
                   />
-                  {formData.ddName && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setFormData(prev => ({ ...prev, ddName: "", ddMobile: "" }));
-                        setDdSearchQuery("");
-                      }}
-                      style={{
-                        position: "absolute",
-                        right: "8px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        background: "#e5e7eb",
-                        border: "none",
-                        borderRadius: "50%",
-                        width: "22px",
-                        height: "22px",
-                        cursor: "pointer",
-                        fontSize: "14px",
-                        color: "#6b7280",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        lineHeight: "1",
-                        padding: "0",
-                        transition: "all 0.2s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = "#d1d5db";
-                        e.currentTarget.style.color = "#374151";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "#e5e7eb";
-                        e.currentTarget.style.color = "#6b7280";
-                      }}
-                    >
-                      ✖
-                    </button>
-                  )}
                 </div>
-                
-                {/* Dropdown List */}
-                {isDdDropdownOpen && !isLoadingDD && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "100%",
-                      left: 0,
-                      right: 0,
-                      maxHeight: "200px",
-                      overflowY: "auto",
-                      backgroundColor: "white",
-                      border: "1px solid #ddd",
-                      borderRadius: "4px",
-                      marginTop: "4px",
-                      zIndex: 1000,
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                    }}
-                  >
-                    {filteredDdList.length > 0 ? (
-                      filteredDdList.map((dd) => (
-                        <div
-                          key={dd._id}
-                          onClick={() => {
-                            setFormData(prev => ({ 
-                              ...prev, 
-                              ddName: dd._id,
-                              ddMobile: dd.phone || ""
-                            }));
-                            setDdSearchQuery("");
-                            setIsDdDropdownOpen(false);
-                          }}
-                          style={{
-                            padding: "10px 12px",
-                            cursor: "pointer",
-                            borderBottom: "1px solid #f0f0f0",
-                            backgroundColor: (formData.ddName === dd._id) ? "#f0f8ff" : "white",
-                          }}
-                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f5f5f5"}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = 
-                              (formData.ddName === dd._id) ? "#f0f8ff" : "white";
-                          }}
-                        >
-                          <div style={{ fontWeight: "500" }}>{dd.name}</div>
-                          <div style={{ fontSize: "0.85rem", color: "#666" }}>{dd.phone}</div>
-                        </div>
-                      ))
-                    ) : (
-                      <div style={{ padding: "10px 12px", color: "#999", textAlign: "center" }}>
-                        No DD found
-                      </div>
-                    )}
-                  </div>
-                )}
-                
-                {/* Click outside to close dropdown */}
-                {isDdDropdownOpen && (
-                  <div
-                    onClick={() => setIsDdDropdownOpen(false)}
-                    style={{
-                      position: "fixed",
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      zIndex: 999,
-                    }}
+                <div className="input-field">
+                  <label>Nominee Age</label>
+                  <input
+                    type="number"
+                    name="nomineeAge"
+                    value={formData.nomineeAge || ""}
+                    onChange={(e) => handleChange(index, e)}
                   />
-                )}
-                {errors.ddName && <span className="error">{errors.ddName}</span>}
+                </div>
               </div>
 
-              {/* ✅ DD Mobile - Auto-filled and disabled */}
               <div className="input-field">
-                <label>DD Mobile <span style={{ color: "red" }}>*</span></label>
-                <input
-                  type="tel"
-                  name="ddMobile"
-                  value={formData.ddMobile || ""}
-                  disabled
-                  style={{ backgroundColor: "#f3f4f6", cursor: "not-allowed" }}
-                  placeholder="Auto-filled from DD selection"
-                />
-                {errors.ddMobile && <span className="error">{errors.ddMobile}</span>}
-              </div>
-            </div>
-
-            {/* Family & Nominee Info */}
-            <h2 className="section-title">
-              <Users className="section-icon" /> Nominee Details
-            </h2>
-            <div className="grid-2">
-              <div className="input-field">
-                <label>Nominee Name</label>
+                <label>Nominee Relationship</label>
                 <input
                   type="text"
-                  name="nomineeName"
-                  value={formData.nomineeName || ""}
-                  onChange={handleChange}
+                  name="nomineeRelation"
+                  placeholder="e.g. Spouse, Son, Daughter"
+                  value={formData.nomineeRelation || ""}
+                  onChange={(e) => handleChange(index, e)}
                 />
-                {errors.nomineeName && <span className="error">{errors.nomineeName}</span>}
               </div>
-              <div className="input-field">
-                <label>Nominee Age</label>
-                <input
-                  type="number"
-                  name="nomineeAge"
-                  value={formData.nomineeAge || ""}
-                  onChange={handleChange}
-                />
-                {errors.nomineeAge && <span className="error">{errors.nomineeAge}</span>}
-              </div>
-            </div>
 
-            <div className="input-field">
-              <label>Nominee Relationship</label>
-              <input
-                type="text"
-                name="nomineeRelation"
-                placeholder="e.g. Spouse, Son, Daughter"
-                value={formData.nomineeRelation || ""}
-                onChange={handleChange}
-              />
-              {errors.nomineeRelation && <span className="error">{errors.nomineeRelation}</span>}
             </div>
-          </div>
+          ))}
 
-          {/* Submit */}
           <div className="form-footer">
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              className={`submit-button ${isSubmitting ? "submitting" : ""}`}
-            >
-              {isSubmitting
-                ? "Processing Application..."
-                : "Submit Application"}
+            <button type="submit" className="submit-btn" disabled={isSubmitting}>
+              {isSubmitting ? "Processing..." : "Submit Applications"}
             </button>
-            <p className="form-disclaimer">
-              By submitting this form, you agree to our terms and conditions and
-              privacy policy.
-            </p>
           </div>
-        </div>
+        </form>
+      </div>
 
-        {/* ✅ Reference ID Popup */}
-        {showReferencePopup && (
-          <div className="modal-overlay">
-            <div
-              className="modal-box"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="reference-modal-title"
-            >
-              <h2
-                id="reference-modal-title"
-                style={{ marginBottom: 12, fontSize: 18, fontWeight: 600 }}
-              >
-                Enter Reference ID
-              </h2>
-
-              <div style={{ marginBottom: 16 }}>
-                <label style={{ display: "block", marginBottom: 8, fontSize: 14,}}>
-                  Reference ID
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter reference ID"
-                  value={referenceId}
-                  onChange={(e) => setReferenceId(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "12px 16px",
-                    border: "1px solid #ddd",
-                    borderRadius: "6px",
-                    fontSize: "14px",
-                    boxSizing: "border-box",
-                  }}
-                  autoFocus
-                />
-              </div>
-
-              <div className="modal-actions">
-                <button
-                  type="button"
-                  className="modal-action-btn"
-                  onClick={handlePopupClose}
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="button"
-                  className="modal-action-btn primary"
-                  onClick={handleFinalSubmit}
-                  disabled={!referenceId.trim() || isSubmitting}
-                >
-                  {isSubmitting ? "Submitting..." : "Submit"}
-                </button>
-              </div>
+      {/* ✅ Reference ID Popup */}
+      {showReferencePopup && (
+        <div className="popup-overlay">
+          <div className="popup-content">
+            <h3>Enter Reference ID</h3>
+            <p>Please enter the reference ID to complete the submission.</p>
+            <input
+              type="text"
+              className="reference-input"
+              placeholder="Reference ID"
+              value={referenceId}
+              onChange={(e) => setReferenceId(e.target.value)}
+            />
+            <div className="popup-actions">
+              <button className="cancel-btn" onClick={handlePopupClose}>Cancel</button>
+              <button className="confirm-btn" onClick={handleFinalSubmit} disabled={isSubmitting}>
+                {isSubmitting ? "Submitting..." : "Confirm & Submit"}
+              </button>
             </div>
           </div>
-        )}
-
-        {/* Footer */}
-        <div className="app-footer">
-          <p>
-            © {new Date().getFullYear()} Life Alliance Enterprises. All rights
-            reserved.
-          </p>
-          <p>For assistance, contact our customer support team.</p>
         </div>
-      </div>
+      )}
     </div>
   );
 }
