@@ -39,6 +39,7 @@ function App() {
   // ✅ Popup state for reference ID only
   const [showReferencePopup, setShowReferencePopup] = useState(false);
   const [referenceId, setReferenceId] = useState("");
+  const [paymentMode, setPaymentMode] = useState(""); // cash, card, upi
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -293,8 +294,15 @@ function App() {
   };
 
   const handleFinalSubmit = async () => {
-    if (!referenceId.trim()) {
-      alert("Please enter a Reference ID.");
+    // ✅ Validate payment mode
+    if (!paymentMode) {
+      alert("Please select a payment mode.");
+      return;
+    }
+
+    // ✅ Reference ID is required for card/upi, optional for cash
+    if ((paymentMode === "card" || paymentMode === "upi") && !referenceId.trim()) {
+      alert("Please enter a Reference ID for card/UPI payment.");
       return;
     }
 
@@ -306,7 +314,8 @@ function App() {
         return {
           ...formDataToSend,
           projectId: formDataToSend.schemeNo, // Backend expects projectId (same as schemeNo)
-          referenceId: referenceId, // Attach Reference ID to each
+          referenceId: paymentMode === "cash" ? "" : referenceId, // Empty for cash, value for card/upi
+          paymentMode: paymentMode, // Include payment mode
         };
       });
 
@@ -350,6 +359,7 @@ function App() {
   // ✅ Reset popup when closing
   const handlePopupClose = () => {
     setReferenceId("");
+    setPaymentMode("");
     setShowReferencePopup(false);
   };
   
@@ -863,15 +873,59 @@ function App() {
       {showReferencePopup && (
         <div className="popup-overlay">
           <div className="popup-content">
-            <h3>Enter Reference ID</h3>
-            <p>Please enter the reference ID to complete the submission.</p>
-            <input
-              type="text"
-              className="reference-input"
-              placeholder="Reference ID"
-              value={referenceId}
-              onChange={(e) => setReferenceId(e.target.value)}
-            />
+            <h3>Payment Details</h3>
+            <p>Please select payment mode and enter reference ID if applicable.</p>
+            
+            {/* Payment Mode Dropdown */}
+            <div style={{ marginBottom: "1rem", textAlign: "left" }}>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500", color: "#374151" }}>
+                Payment Mode <span style={{ color: "red" }}>*</span>
+              </label>
+              <select
+                value={paymentMode}
+                onChange={(e) => {
+                  setPaymentMode(e.target.value);
+                  // Clear reference ID when switching to cash
+                  if (e.target.value === "cash") {
+                    setReferenceId("");
+                  }
+                }}
+                style={{
+                  width: "100%",
+                  padding: "0.75rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "6px",
+                  fontSize: "1rem",
+                  outline: "none"
+                }}
+              >
+                <option value="">Select payment mode</option>
+                <option value="cash">Cash</option>
+                <option value="card">Card</option>
+                <option value="upi">UPI</option>
+              </select>
+            </div>
+
+            {/* Reference ID Input - Conditional */}
+            <div style={{ marginBottom: "1.5rem", textAlign: "left" }}>
+              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500", color: paymentMode === "cash" ? "#9ca3af" : "#374151" }}>
+                Reference ID {(paymentMode === "card" || paymentMode === "upi") && <span style={{ color: "red" }}>*</span>}
+              </label>
+              <input
+                type="text"
+                className="reference-input"
+                placeholder={paymentMode === "cash" ? "Not required for cash" : "Enter reference ID"}
+                value={referenceId}
+                onChange={(e) => setReferenceId(e.target.value)}
+                disabled={paymentMode === "cash"}
+                style={{
+                  backgroundColor: paymentMode === "cash" ? "#f3f4f6" : "white",
+                  cursor: paymentMode === "cash" ? "not-allowed" : "text",
+                  opacity: paymentMode === "cash" ? 0.6 : 1
+                }}
+              />
+            </div>
+
             <div className="popup-actions">
               <button className="cancel-btn" onClick={handlePopupClose}>Cancel</button>
               <button className="confirm-btn" onClick={handleFinalSubmit} disabled={isSubmitting}>
