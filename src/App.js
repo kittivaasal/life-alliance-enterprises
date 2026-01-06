@@ -1,4 +1,4 @@
-import { Building2, CreditCard, User, Users } from "lucide-react";
+import { CreditCard, User, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import "./App.css";
 
@@ -368,7 +368,7 @@ function App() {
       <div className="form-wrapper">
         <header className="form-header">
           <div className="logo-section">
-            <Building2 className="logo-icon" />
+            <img src="/log.jpg" alt="Life Alliance Enterprises Logo" className="logo-icon" style={{ height: '48px', width: 'auto' }} />
             <h1>Life Alliance Enterprises</h1>
           </div>
           <p className="subtitle">Customer Application Form</p>
