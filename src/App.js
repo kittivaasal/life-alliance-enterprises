@@ -1,5 +1,5 @@
 import { CreditCard, User, Users } from "lucide-react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./App.css";
 
 function App() {
@@ -244,30 +244,15 @@ function App() {
         isValid = false;
       }
 
-      // Introducer Name
-      if (!formData.introducerName) {
-        newErrors[`introducerName-${index}`] = "Introducer name is required";
-        isValid = false;
-      }
-
-      // Introducer Mobile
-      if (!formData.introducerMobileNo) {
-        newErrors[`introducerMobileNo-${index}`] = "Introducer mobile is required";
-        isValid = false;
-      } else if (!/^\d{10}$/.test(formData.introducerMobileNo)) {
+      // Introducer Name - Optional
+      // Introducer Mobile - Optional (but validate format if provided)
+      if (formData.introducerMobileNo && !/^\d{10}$/.test(formData.introducerMobileNo)) {
         newErrors[`introducerMobileNo-${index}`] = "Enter a valid 10-digit mobile number";
         isValid = false;
       }
 
-      // CED
-      if (!formData.cedName) {
-        newErrors[`cedName-${index}`] = "CED name is required";
-        isValid = false;
-      }
-      if (!formData.cedMobile) {
-        newErrors[`cedMobile-${index}`] = "CED mobile is required";
-        isValid = false;
-      }
+      // CED - Optional
+      // No validation needed for CED fields
 
       // DD
       if (!formData.ddName) {
@@ -374,95 +359,27 @@ function App() {
           <p className="subtitle">Customer Application Form</p>
         </header>
 
-        {/* ✅ Number of Applications Input with Copy Checkbox */}
+        {/* ✅ Number of Applications Input */}
         <div style={{ marginBottom: "20px", padding: "15px", backgroundColor: "#f8f9fa", borderRadius: "8px", border: "1px solid #e9ecef" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", alignItems: "end" }}>
-            <div className="input-field" style={{ marginBottom: 0 }}>
-              <label style={{ fontSize: "1rem", fontWeight: "600", color: "#374151" }}>Number of Applications</label>
-              <input
-                type="number"
-                min="1"
-                max="50"
-                value={numberOfForms}
-                onChange={handleNumberOfFormsChange}
-                style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }}
-              />
-            </div>
-            
-            {/* Copy to All Checkbox */}
-            {numberOfForms > 1 && (
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", paddingBottom: "10px" }}>
-                <input
-                  type="checkbox"
-                  id="copyToAll"
-                  checked={copyAllChecked}
-                  onChange={(e) => {
-                    setCopyAllChecked(e.target.checked);
-                    if (e.target.checked) {
-                      // Copy Form #1 data to all other forms
-                      setFormsData((prev) => {
-                        const newData = [...prev];
-                        const firstForm = newData[0];
-                        for (let i = 1; i < newData.length; i++) {
-                          newData[i] = {
-                            ...firstForm,
-                            idNo: newData[i].idNo, // Keep unique ID
-                          };
-                        }
-                        return newData;
-                      });
-                    }
-                  }}
-                  disabled={
-                    // Disable if Form #1 doesn't have all required fields
-                    !formsData[0]?.schemeNo ||
-                    !formsData[0]?.nameOfCustomer ||
-                    !formsData[0]?.communicationAddress ||
-                    !formsData[0]?.mobileNo ||
-                    !formsData[0]?.email ||
-                    !formsData[0]?.introducerName ||
-                    !formsData[0]?.introducerMobileNo ||
-                    !formsData[0]?.cedName ||
-                    !formsData[0]?.cedMobile ||
-                    !formsData[0]?.ddName ||
-                    !formsData[0]?.ddMobile
-                  }
-                  style={{ width: "18px", height: "18px", cursor: "pointer", accentColor: "#4f46e5" }}
-                />
-                <label 
-                  htmlFor="copyToAll" 
-                  style={{ 
-                    fontSize: "0.95rem", 
-                    fontWeight: "500", 
-                    color: (
-                      !formsData[0]?.schemeNo ||
-                      !formsData[0]?.nameOfCustomer ||
-                      !formsData[0]?.communicationAddress ||
-                      !formsData[0]?.mobileNo ||
-                      !formsData[0]?.email ||
-                      !formsData[0]?.introducerName ||
-                      !formsData[0]?.introducerMobileNo ||
-                      !formsData[0]?.cedName ||
-                      !formsData[0]?.cedMobile ||
-                      !formsData[0]?.ddName ||
-                      !formsData[0]?.ddMobile
-                    ) ? "#9ca3af" : "#4f46e5",
-                    cursor: "pointer",
-                    userSelect: "none"
-                  }}
-                >
-                  Copy Application #1 to all
-                </label>
-              </div>
-            )}
+          <div className="input-field" style={{ marginBottom: 0 }}>
+            <label style={{ fontSize: "1rem", fontWeight: "600", color: "#374151" }}>Number of Applications</label>
+            <input
+              type="number"
+              min="1"
+              max="50"
+              value={numberOfForms}
+              onChange={handleNumberOfFormsChange}
+              style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }}
+            />
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="customer-form">
           {formsData.map((formData, index) => (
-            <div key={formData.idNo} className="application-card" style={{ marginBottom: "30px", borderBottom: "4px solid #4f46e5", paddingBottom: "20px" }}>
-              
-              <h3 className="section-title" style={{ margin: 0, marginBottom: "15px" }}>Application #{index + 1}</h3>
+            <React.Fragment key={formData.idNo}>
+              <div className="application-card" style={{ marginBottom: "30px", borderBottom: "4px solid #4f46e5", paddingBottom: "20px" }}>
+                
+                <h3 className="section-title" style={{ margin: 0, marginBottom: "15px" }}>Application #{index + 1}</h3>
 
               {/* Application Details */}
               <h2 className="section-title">
@@ -637,7 +554,7 @@ function App() {
               </h2>
               <div className="grid-2">
                 <div className="input-field">
-                  <label>Introducer Name <span style={{ color: "red" }}>*</span></label>
+                  <label>Introducer Name</label>
                   <input
                     type="text"
                     name="introducerName"
@@ -647,7 +564,7 @@ function App() {
                   {errors[`introducerName-${index}`] && <span className="error">{errors[`introducerName-${index}`]}</span>}
                 </div>
                 <div className="input-field">
-                  <label>Introducer Mobile <span style={{ color: "red" }}>*</span></label>
+                  <label>Introducer Mobile</label>
                   <input
                     type="tel"
                     name="introducerMobileNo"
@@ -661,7 +578,7 @@ function App() {
               <div className="grid-2">
                 {/* ✅ CED Name Dropdown */}
                 <div className="input-field" style={{ position: "relative" }}>
-                  <label>CED Name <span style={{ color: "red" }}>*</span></label>
+                  <label>CED Name</label>
                   <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
                     <input
                       type="text"
@@ -727,7 +644,7 @@ function App() {
                 
                 {/* ✅ CED Mobile */}
                 <div className="input-field">
-                  <label>CED Mobile <span style={{ color: "red" }}>*</span></label>
+                  <label>CED Mobile</label>
                   <input
                     type="tel"
                     name="cedMobile"
@@ -858,7 +775,69 @@ function App() {
                 />
               </div>
 
-            </div>
+              </div>
+
+              {/* ✅ Copy to All Checkbox - Appears after Application #1 */}
+              {index === 0 && numberOfForms > 1 && (
+                <div style={{ marginTop: "20px", marginBottom: "30px", padding: "15px", backgroundColor: "#f8f9fa", borderRadius: "8px", border: "1px solid #e9ecef" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <input
+                      type="checkbox"
+                      id="copyToAll"
+                      checked={copyAllChecked}
+                      onChange={(e) => {
+                        setCopyAllChecked(e.target.checked);
+                        if (e.target.checked) {
+                          // Copy Form #1 data to all other forms
+                          setFormsData((prev) => {
+                            const newData = [...prev];
+                            const firstForm = newData[0];
+                            for (let i = 1; i < newData.length; i++) {
+                              newData[i] = {
+                                ...firstForm,
+                                idNo: newData[i].idNo, // Keep unique ID
+                              };
+                            }
+                            return newData;
+                          });
+                        }
+                      }}
+                      disabled={
+                        // Disable if Form #1 doesn't have all required fields
+                        !formsData[0]?.schemeNo ||
+                        !formsData[0]?.nameOfCustomer ||
+                        !formsData[0]?.communicationAddress ||
+                        !formsData[0]?.mobileNo ||
+                        !formsData[0]?.email ||
+                        !formsData[0]?.ddName ||
+                        !formsData[0]?.ddMobile
+                      }
+                      style={{ width: "18px", height: "18px", cursor: "pointer", accentColor: "#4f46e5" }}
+                    />
+                    <label 
+                      htmlFor="copyToAll" 
+                      style={{ 
+                        fontSize: "0.95rem", 
+                        fontWeight: "500", 
+                        color: (
+                          !formsData[0]?.schemeNo ||
+                          !formsData[0]?.nameOfCustomer ||
+                          !formsData[0]?.communicationAddress ||
+                          !formsData[0]?.mobileNo ||
+                          !formsData[0]?.email ||
+                          !formsData[0]?.ddName ||
+                          !formsData[0]?.ddMobile
+                        ) ? "#9ca3af" : "#4f46e5",
+                        cursor: "pointer",
+                        userSelect: "none"
+                      }}
+                    >
+                      ✨ Copy Application #1 to all remaining applications
+                    </label>
+                  </div>
+                </div>
+              )}
+            </React.Fragment>
           ))}
 
           <div className="form-footer">
