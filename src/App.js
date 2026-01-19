@@ -82,7 +82,7 @@ function App() {
     // if (!formData.motherName) newErrors.motherName = "Mother's name is required";
     // if (!formData.nomineeName) newErrors.nomineeName = "Nominee name is required";
     // if (!formData.nomineeAge) newErrors.nomineeAge = "Nominee age is required";
-    if (!formData.introducerName) newErrors.introducerName = "Introducer name is required";
+    // if (!formData.introducerName) newErrors.introducerName = "Introducer name is required";
     // if (!formData.introducerMobileNo) newErrors.introducerMobileNo = "Introducer mobile is required";
     // if (!/^\d{10}$/.test(formData.introducerMobileNo)) newErrors.introducerMobileNo = "Enter a valid 10-digit mobile number";
     // if (!formData.cedName) newErrors.cedName = "CED name is required";
