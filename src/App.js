@@ -310,7 +310,7 @@ function App() {
       };
 
       // Sending array directly based on user request ("send all data as array")
-      const response = await fetch(`${process.env.REACT_APP_API_URL || "https://customer-form-8auo.onrender.com/api/life/saving/create"}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || "https://customer-form-8auo.onrender.com/api/alliance/customer/form/create"}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         // body: JSON.stringify({ data: payload }), // Usually structure is { data: [...] } or just [...]
@@ -513,7 +513,7 @@ function App() {
               </div>
 
               <div className="input-field">
-                <label>Communication Address</label>
+                <label>Communication Address <span style={{ color: "red" }}>*</span></label>
                 <textarea
                   name="communicationAddress"
                   placeholder="Enter full address"
