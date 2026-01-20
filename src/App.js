@@ -800,6 +800,19 @@ function App() {
                             }
                             return newData;
                           });
+                        } else {
+                          // ✅ Clear all forms except the first one when unchecked
+                          setFormsData((prev) => {
+                            const newData = [...prev];
+                            for (let i = 1; i < newData.length; i++) {
+                              const preservedId = newData[i].idNo; // Preserve unique ID
+                              newData[i] = {
+                                ...getInitialFormData(),
+                                idNo: preservedId, // Restore the unique ID
+                              };
+                            }
+                            return newData;
+                          });
                         }
                       }}
                       disabled={
