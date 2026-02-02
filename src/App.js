@@ -298,7 +298,7 @@ function App() {
         const { schemeName, ...formDataToSend } = form; // Remove schemeName (display only)
         return {
           ...formDataToSend,
-          projectId: formDataToSend.schemeNo, // Backend expects projectId (same as schemeNo)
+          projectId: formDataToSend.projectId, // Backend expects projectId (same as schemeNo)
           referenceId: paymentMode === "cash" ? "" : referenceId, // Empty for cash, value for card/upi
           paymentMode: paymentMode, // Include payment mode
         };
@@ -440,7 +440,7 @@ function App() {
                             key={project.id || project._id}
                             onClick={() => {
                               const newData = [...formsData];
-                              newData[index].schemeNo = project.id || project._id; // Store ID
+                              newData[index].schemeNo = project._id; // Store ID
                               newData[index].schemeName = project.name || project.projectName || project.schemeName; // Store name
                               setFormsData(newData);
                               setSchemeSearchQuery("");
