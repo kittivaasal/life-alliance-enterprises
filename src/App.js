@@ -296,7 +296,6 @@ function App() {
       // ✅ Construct Array Payload for Bulk Submission
       const formsArray = formsData.map((form) => {
         const { schemeName, ...formDataToSend } = form; // Remove schemeName (display only)
-        console.log(formDataToSend, "testing")
         return {
           ...formDataToSend,
           projectId: formDataToSend.schemeNo, // Backend expects projectId (same as schemeNo)
