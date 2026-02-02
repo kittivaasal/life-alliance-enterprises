@@ -101,7 +101,7 @@ function App() {
     const fetchAllProjects = async () => {
       setIsLoadingProjects(true);
       try {
-        const response = await fetch(`${baseUrl}api/project/get/all`);
+        const response = await fetch(`${baseUrl}/api/project/get/all`);
         if (!response.ok) throw new Error(`Failed to fetch projects: ${response.status}`);
         const data = await response.json();
         const projects = Array.isArray(data) ? data : data.data || [];
@@ -296,9 +296,10 @@ function App() {
       // ✅ Construct Array Payload for Bulk Submission
       const formsArray = formsData.map((form) => {
         const { schemeName, ...formDataToSend } = form; // Remove schemeName (display only)
+        console.log(formDataToSend, "testing")
         return {
           ...formDataToSend,
-          projectId: formDataToSend.projectId, // Backend expects projectId (same as schemeNo)
+          projectId: formDataToSend.schemeNo, // Backend expects projectId (same as schemeNo)
           referenceId: paymentMode === "cash" ? "" : referenceId, // Empty for cash, value for card/upi
           paymentMode: paymentMode, // Include payment mode
         };
