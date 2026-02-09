@@ -119,7 +119,7 @@ function App() {
     const fetchCEDList = async () => {
       setIsLoadingCED(true);
       try {
-        const response = await fetch(`${baseUrl}/api/market/head/get/all?percentageName=C.E.D`);
+        const response = await fetch(`${baseUrl}/api/market/detail/get/all`);
         if (!response.ok) throw new Error(`Failed to fetch CED list: ${response.status}`);
         const data = await response.json();
         const cedData = Array.isArray(data) ? data : data.data || [];
@@ -137,8 +137,8 @@ function App() {
     const fetchDDList = async () => {
       setIsLoadingDD(true);
       try {
-        // ✅ Using 'DIAMOND DIRECTOR' based on user request (encoded as %20 for space)
-        const response = await fetch(`${baseUrl}/api/market/head/get/all?percentageName=DIAMOND%20DIRECTOR`);
+        // ✅ Using 'DIAMOND DIRECTOR' endpoint as requested, no query params
+        const response = await fetch(`${baseUrl}/api/market/head/get/all`);
         if (!response.ok) throw new Error(`Failed to fetch DD list: ${response.status}`);
         const data = await response.json();
         const ddData = Array.isArray(data) ? data : data.data || [];
@@ -246,10 +246,10 @@ function App() {
 
       // Introducer Name - Optional
       // Introducer Mobile - Optional (but validate format if provided)
-      if (formData.introducerMobileNo && !/^\d{10}$/.test(formData.introducerMobileNo)) {
+      /* if (formData.introducerMobileNo && !/^\d{10}$/.test(formData.introducerMobileNo)) {
         newErrors[`introducerMobileNo-${index}`] = "Enter a valid 10-digit mobile number";
         isValid = false;
-      }
+      } */
 
       // CED - Optional
       // No validation needed for CED fields
@@ -552,7 +552,7 @@ function App() {
               <h2 className="section-title">
                 <Users className="section-icon" /> Introducer & Reference Details
               </h2>
-              <div className="grid-2">
+              {/* <div className="grid-2">
                 <div className="input-field">
                   <label>Introducer Name</label>
                   <input
@@ -572,6 +572,88 @@ function App() {
                     onChange={(e) => handleChange(index, e)}
                   />
                   {errors[`introducerMobileNo-${index}`] && <span className="error">{errors[`introducerMobileNo-${index}`]}</span>}
+                </div>
+              </div> */}
+
+              <div className="grid-2">
+                {/* ✅ DD Name Dropdown */}
+                <div className="input-field" style={{ position: "relative" }}>
+                  <label>DD Name <span style={{ color: "red" }}>*</span></label>
+                  <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                    <input
+                      type="text"
+                      placeholder={isLoadingDD ? "Loading..." : "Search DD"}
+                      value={
+                        formData.ddName
+                          ? (ddList.find(d => d._id === formData.ddName)?.name || formData.ddName)
+                          : (activeDdDropdown === index ? ddSearchQuery : "")
+                      }
+                      onChange={(e) => {
+                        setDdSearchQuery(e.target.value);
+                        setActiveDdDropdown(index);
+                      }}
+                      onFocus={() => {
+                         setActiveDdDropdown(index);
+                         setDdSearchQuery("");
+                      }}
+                      disabled={isLoadingDD}
+                      style={{ paddingRight: "40px", width: "100%" }}
+                    />
+                    {formData.ddName && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                           const newData = [...formsData];
+                           newData[index].ddName = "";
+                           newData[index].ddMobile = "";
+                           setFormsData(newData);
+                           setDdSearchQuery("");
+                        }}
+                        style={{ position: "absolute", right: "8px", top: "50%", transform: "translateY(-50%)", background: "#e5e7eb", border: "none", borderRadius: "50%", width: "22px", height: "22px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                      >✖</button>
+                    )}
+                  </div>
+                  
+                  {/* Dropdown List */}
+                  {activeDdDropdown === index && !isLoadingDD && (
+                    <div className="dropdown-list" style={{ position: "absolute", top: "100%", left: 0, right: 0, maxHeight: "200px", overflowY: "auto", backgroundColor: "white", border: "1px solid #ddd", zIndex: 1000 }}>
+                      {filteredDdList.length > 0 ? (
+                        filteredDdList.map((dd) => (
+                          <div
+                            key={dd._id}
+                            onClick={() => {
+                               const newData = [...formsData];
+                               newData[index].ddName = dd._id;
+                               newData[index].ddMobile = dd.phone || "";
+                               setFormsData(newData);
+                               setDdSearchQuery("");
+                               setActiveDdDropdown(null);
+                            }}
+                            className="dropdown-item" style={{ padding: "10px", cursor: "pointer", borderBottom: "1px solid #eee" }}
+                          >
+                            <div style={{ fontWeight: "500" }}>{dd.name}</div>
+                            <div style={{ fontSize: "0.85rem", color: "#666" }}>{dd.phone}</div>
+                          </div>
+                        ))
+                      ) : (<div style={{ padding: "10px", color: "#999" }}>No DD found</div>)}
+                    </div>
+                  )}
+                  {activeDdDropdown === index && <div className="overlay" onClick={() => setActiveDdDropdown(null)} style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 999 }} />}
+                  {errors[`ddName-${index}`] && <span className="error">{errors[`ddName-${index}`]}</span>}
+                </div>
+
+                {/* ✅ DD Mobile */}
+                <div className="input-field">
+                  <label>DD Mobile <span style={{ color: "red" }}>*</span></label>
+                  <input
+                    type="tel"
+                    name="ddMobile"
+                    value={formData.ddMobile || ""}
+                    disabled
+                    style={{ backgroundColor: "#f3f4f6", cursor: "not-allowed" }}
+                    placeholder="Auto-filled"
+                  />
+                  {errors[`ddMobile-${index}`] && <span className="error">{errors[`ddMobile-${index}`]}</span>}
                 </div>
               </div>
 
@@ -654,88 +736,6 @@ function App() {
                     placeholder="Auto-filled"
                   />
                   {errors[`cedMobile-${index}`] && <span className="error">{errors[`cedMobile-${index}`]}</span>}
-                </div>
-              </div>
-
-              <div className="grid-2">
-                {/* ✅ DD Name Dropdown */}
-                <div className="input-field" style={{ position: "relative" }}>
-                  <label>DD Name <span style={{ color: "red" }}>*</span></label>
-                  <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-                    <input
-                      type="text"
-                      placeholder={isLoadingDD ? "Loading..." : "Search DD"}
-                      value={
-                        formData.ddName
-                          ? (ddList.find(d => d._id === formData.ddName)?.name || formData.ddName)
-                          : (activeDdDropdown === index ? ddSearchQuery : "")
-                      }
-                      onChange={(e) => {
-                        setDdSearchQuery(e.target.value);
-                        setActiveDdDropdown(index);
-                      }}
-                      onFocus={() => {
-                         setActiveDdDropdown(index);
-                         setDdSearchQuery("");
-                      }}
-                      disabled={isLoadingDD}
-                      style={{ paddingRight: "40px", width: "100%" }}
-                    />
-                    {formData.ddName && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                           const newData = [...formsData];
-                           newData[index].ddName = "";
-                           newData[index].ddMobile = "";
-                           setFormsData(newData);
-                           setDdSearchQuery("");
-                        }}
-                        style={{ position: "absolute", right: "8px", top: "50%", transform: "translateY(-50%)", background: "#e5e7eb", border: "none", borderRadius: "50%", width: "22px", height: "22px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
-                      >✖</button>
-                    )}
-                  </div>
-                  
-                  {/* Dropdown List */}
-                  {activeDdDropdown === index && !isLoadingDD && (
-                    <div className="dropdown-list" style={{ position: "absolute", top: "100%", left: 0, right: 0, maxHeight: "200px", overflowY: "auto", backgroundColor: "white", border: "1px solid #ddd", zIndex: 1000 }}>
-                      {filteredDdList.length > 0 ? (
-                        filteredDdList.map((dd) => (
-                          <div
-                            key={dd._id}
-                            onClick={() => {
-                               const newData = [...formsData];
-                               newData[index].ddName = dd._id;
-                               newData[index].ddMobile = dd.phone || "";
-                               setFormsData(newData);
-                               setDdSearchQuery("");
-                               setActiveDdDropdown(null);
-                            }}
-                            className="dropdown-item" style={{ padding: "10px", cursor: "pointer", borderBottom: "1px solid #eee" }}
-                          >
-                            <div style={{ fontWeight: "500" }}>{dd.name}</div>
-                            <div style={{ fontSize: "0.85rem", color: "#666" }}>{dd.phone}</div>
-                          </div>
-                        ))
-                      ) : (<div style={{ padding: "10px", color: "#999" }}>No DD found</div>)}
-                    </div>
-                  )}
-                  {activeDdDropdown === index && <div className="overlay" onClick={() => setActiveDdDropdown(null)} style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 999 }} />}
-                  {errors[`ddName-${index}`] && <span className="error">{errors[`ddName-${index}`]}</span>}
-                </div>
-
-                {/* ✅ DD Mobile */}
-                <div className="input-field">
-                  <label>DD Mobile <span style={{ color: "red" }}>*</span></label>
-                  <input
-                    type="tel"
-                    name="ddMobile"
-                    value={formData.ddMobile || ""}
-                    disabled
-                    style={{ backgroundColor: "#f3f4f6", cursor: "not-allowed" }}
-                    placeholder="Auto-filled"
-                  />
-                  {errors[`ddMobile-${index}`] && <span className="error">{errors[`ddMobile-${index}`]}</span>}
                 </div>
               </div>
 
