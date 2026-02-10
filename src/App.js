@@ -24,9 +24,9 @@ function App() {
       nomineeRelation: "",
       introducerName: "",
       introducerMobileNo: "",
-      cedName: "",
+      cedId: "",
       cedMobile: "",
-      ddName: "",
+      ddId: "",
       ddMobile: "",
     };
   };
@@ -255,8 +255,8 @@ function App() {
       // No validation needed for CED fields
 
       // DD
-      if (!formData.ddName) {
-        newErrors[`ddName-${index}`] = "DD name is required";
+      if (!formData.ddId) {
+        newErrors[`ddId-${index}`] = "DD name is required";
         isValid = false;
       }
       if (!formData.ddMobile) {
@@ -584,8 +584,8 @@ function App() {
                       type="text"
                       placeholder={isLoadingDD ? "Loading..." : "Search DD"}
                       value={
-                        formData.ddName
-                          ? (ddList.find(d => d._id === formData.ddName)?.name || formData.ddName)
+                        formData.ddId
+                          ? (ddList.find(d => d._id === formData.ddId)?.name || formData.ddId)
                           : (activeDdDropdown === index ? ddSearchQuery : "")
                       }
                       onChange={(e) => {
@@ -599,12 +599,12 @@ function App() {
                       disabled={isLoadingDD}
                       style={{ paddingRight: "40px", width: "100%" }}
                     />
-                    {formData.ddName && (
+                    {formData.ddId && (
                       <button
                         type="button"
                         onClick={() => {
                            const newData = [...formsData];
-                           newData[index].ddName = "";
+                           newData[index].ddId = "";
                            newData[index].ddMobile = "";
                            setFormsData(newData);
                            setDdSearchQuery("");
@@ -623,7 +623,7 @@ function App() {
                             key={dd._id}
                             onClick={() => {
                                const newData = [...formsData];
-                               newData[index].ddName = dd._id;
+                               newData[index].ddId = dd._id;
                                newData[index].ddMobile = dd.phone || "";
                                setFormsData(newData);
                                setDdSearchQuery("");
@@ -639,7 +639,7 @@ function App() {
                     </div>
                   )}
                   {activeDdDropdown === index && <div className="overlay" onClick={() => setActiveDdDropdown(null)} style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 999 }} />}
-                  {errors[`ddName-${index}`] && <span className="error">{errors[`ddName-${index}`]}</span>}
+                  {errors[`ddId-${index}`] && <span className="error">{errors[`ddId-${index}`]}</span>}
                 </div>
 
                 {/* ✅ DD Mobile */}
@@ -666,8 +666,8 @@ function App() {
                       type="text"
                       placeholder={isLoadingCED ? "Loading..." : "Search CED"}
                       value={
-                        formData.cedName
-                          ? (cedList.find(c => c._id === formData.cedName)?.name || formData.cedName)
+                        formData.cedId
+                          ? (cedList.find(c => c._id === formData.cedId)?.name || formData.cedId)
                           : (activeCedDropdown === index ? cedSearchQuery : "")
                       }
                       onChange={(e) => {
@@ -681,12 +681,12 @@ function App() {
                       disabled={isLoadingCED}
                       style={{ paddingRight: "40px", width: "100%" }}
                     />
-                    {formData.cedName && (
+                    {formData.cedId && (
                       <button
                         type="button"
                         onClick={() => {
                            const newData = [...formsData];
-                           newData[index].cedName = "";
+                           newData[index].cedId = "";
                            newData[index].cedMobile = "";
                            setFormsData(newData);
                            setCedSearchQuery("");
@@ -705,7 +705,7 @@ function App() {
                             key={ced._id}
                             onClick={() => {
                                const newData = [...formsData];
-                               newData[index].cedName = ced._id;
+                               newData[index].cedId = ced._id;
                                newData[index].cedMobile = ced.phone || "";
                                setFormsData(newData);
                                setCedSearchQuery("");
@@ -721,7 +721,7 @@ function App() {
                     </div>
                   )}
                   {activeCedDropdown === index && <div className="overlay" onClick={() => setActiveCedDropdown(null)} style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 999 }} />}
-                  {errors[`cedName-${index}`] && <span className="error">{errors[`cedName-${index}`]}</span>}
+                  {errors[`cedId-${index}`] && <span className="error">{errors[`cedId-${index}`]}</span>}
                 </div>
                 
                 {/* ✅ CED Mobile */}
