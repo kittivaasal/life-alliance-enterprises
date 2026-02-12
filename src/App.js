@@ -822,7 +822,7 @@ function App() {
                         !formsData[0]?.communicationAddress ||
                         !formsData[0]?.mobileNo ||
                         !formsData[0]?.email ||
-                        !formsData[0]?.ddName ||
+                        !formsData[0]?.ddId ||
                         !formsData[0]?.ddMobile
                       }
                       style={{ width: "18px", height: "18px", cursor: "pointer", accentColor: "#4f46e5" }}
@@ -838,7 +838,7 @@ function App() {
                           !formsData[0]?.communicationAddress ||
                           !formsData[0]?.mobileNo ||
                           !formsData[0]?.email ||
-                          !formsData[0]?.ddName ||
+                          !formsData[0]?.ddId ||
                           !formsData[0]?.ddMobile
                         ) ? "#9ca3af" : "#4f46e5",
                         cursor: "pointer",
