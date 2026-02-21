@@ -772,7 +772,7 @@ function App() {
                 <input
                   type="text"
                   name="nomineeRelation"
-                  placeholder="e.g. Spouse, Son, Daughter"
+                  placeholder="e.g Spouse, Son, Daughter"
                   value={formData.nomineeRelation || ""}
                   onChange={(e) => handleChange(index, e)}
                 />
