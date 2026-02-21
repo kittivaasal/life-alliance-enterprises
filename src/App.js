@@ -300,10 +300,10 @@ function App() {
           ...formDataToSend,
           projectId: formDataToSend.schemeNo, // Backend expects projectId (same as schemeNo)
           referenceId: paymentMode === "cash" ? "" : referenceId, // Empty for cash, value 
-          cedId: formDataToSend.cedId || null,
+          cedId: formDataToSend.cedId? formDataToSend.cedId : null,
           //for card/upi
           paymentMode: paymentMode, // Include payment mode
-          //dummy commit
+         
         };
       });
 
