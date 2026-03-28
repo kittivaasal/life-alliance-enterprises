@@ -28,6 +28,8 @@ function App() {
       cedMobile: "",
       ddId: "",
       ddMobile: "",
+      offered: "no",
+      offers: "",
     };
   };
 
@@ -217,6 +219,12 @@ function App() {
       // Scheme
       if (!formData.schemeNo) {
         newErrors[`schemeNo-${index}`] = "Please select a scheme";
+        isValid = false;
+      }
+
+      // Offered / Offers
+      if (formData.offered === "yes" && !formData.offers) {
+        newErrors[`offers-${index}`] = "Offers field is required when Offered is Yes";
         isValid = false;
       }
 
@@ -475,7 +483,38 @@ function App() {
                     style={{ backgroundColor: "#f9fafb", cursor: "not-allowed" }}
                   />
                 </div>
-              </div>       
+              </div>
+
+              {/* Offered / Offers */}
+              <div className="grid-2">
+                <div className="input-field">
+                  <label>Offered <span style={{ color: "red" }}>*</span></label>
+                  <select
+                    name="offered"
+                    value={formData.offered || "no"}
+                    onChange={(e) => handleChange(index, e)}
+                    style={{ width: "100%", padding: "0.75rem", border: "1px solid #d1d5db", borderRadius: "6px", fontSize: "1rem", outline: "none", backgroundColor: "white" }}
+                  >
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
+                </div>
+                
+                {formData.offered === "yes" && (
+                  <div className="input-field">
+                    <label>Offers <span style={{ color: "red" }}>*</span></label>
+                    <input
+                      type="text"
+                      name="offers"
+                      placeholder="Enter offer details"
+                      value={formData.offers || ""}
+                      onChange={(e) => handleChange(index, e)}
+                      style={{ borderColor: errors[`offers-${index}`] ? "red" : "#d1d5db" }}
+                    />
+                    {errors[`offers-${index}`] && <span className="error">{errors[`offers-${index}`]}</span>}
+                  </div>
+                )}
+              </div>
 
               {/* Personal Info */}
               <h2 className="section-title">
@@ -826,7 +865,8 @@ function App() {
                         !formsData[0]?.mobileNo ||
                         !formsData[0]?.email ||
                         !formsData[0]?.ddId ||
-                        !formsData[0]?.ddMobile
+                        !formsData[0]?.ddMobile ||
+                        (formsData[0]?.offered === "yes" && !formsData[0]?.offers)
                       }
                       style={{ width: "18px", height: "18px", cursor: "pointer", accentColor: "#4f46e5" }}
                     />
@@ -842,7 +882,8 @@ function App() {
                           !formsData[0]?.mobileNo ||
                           !formsData[0]?.email ||
                           !formsData[0]?.ddId ||
-                          !formsData[0]?.ddMobile
+                          !formsData[0]?.ddMobile ||
+                          (formsData[0]?.offered === "yes" && !formsData[0]?.offers)
                         ) ? "#9ca3af" : "#4f46e5",
                         cursor: "pointer",
                         userSelect: "none"
